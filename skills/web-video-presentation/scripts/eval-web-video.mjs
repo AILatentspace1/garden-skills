@@ -110,7 +110,7 @@ function checkReferencesLinks() {
 }
 
 // ---------------------------------------------------------------------------
-// L0 Check 2: self-improvement-content
+// L0 Check 2: self-improvement-exists
 // ---------------------------------------------------------------------------
 function checkSelfImprovement() {
   if (!fileExists(SELF_IMPROVEMENT_MD)) {
@@ -258,7 +258,7 @@ function runL0(_opts) {
   const evidence = {};
 
   evidence['references-links'] = checkReferencesLinks();
-  evidence['self-improvement-content'] = checkSelfImprovement();
+  evidence['self-improvement-exists'] = checkSelfImprovement();
   evidence['theme-json-schema'] = checkThemeJsonSchema();
   evidence['templates-completeness'] = checkTemplatesCompleteness();
 
@@ -323,7 +323,7 @@ function main() {
   const { evidence, failures } = runner(opts);
 
   const totalChecks = Object.keys(evidence).length;
-  const passedChecks = Object.values(evidence).filter(r => r.pass !== false).length;
+  const passedChecks = Object.values(evidence).filter(r => r.pass === true).length;
   const score = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) / 100 : 0;
   const pass = failures.length === 0;
 
