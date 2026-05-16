@@ -1,0 +1,23 @@
+.basic-chapter {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  gap: var(--space-5);
+  color: var(--color-ink);
+  background: var(--color-paper);
+}
+
+.basic-chapter__claim {
+  font: var(--font-display);
+}
+
+.basic-chapter__map {
+  width: min(60vw, 32rem);
+  stroke: var(--color-accent);
+  fill: none;
+  stroke-width: 4;
+}
+
+.basic-chapter__caption {
+  color: var(--color-muted);
+}

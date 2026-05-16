@@ -1,0 +1,20 @@
+{
+  "id": "phase1-short-article",
+  "input": {
+    "kind": "article",
+    "title": "Tiny Interfaces Need Big Decisions",
+    "body": "A compact product video should turn one article into a spoken script and a chapter outline before any screen implementation begins."
+  },
+  "expected_phase": "Phase 1",
+  "expected_checkpoint": "Checkpoint Plan",
+  "expected_result": {
+    "pass": true,
+    "score": 1,
+    "failures": [],
+    "evidence": [
+      "script.md",
+      "outline.md",
+      "Checkpoint Plan"
+    ]
+  }
+}

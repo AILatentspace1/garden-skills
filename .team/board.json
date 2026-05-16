@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "updated_at": "2026-05-16T14:38:48.934782+08:00",
+  "tasks": [
+    {
+      "id": "T-7",
+      "title": "Create evals/ directory structure, fixtures, and L0 static checks for web-video-presentation",
+      "skill": "web-video-presentation",
+      "state": "merged",
+      "source": "human-directive:PLAN.md",
+      "fingerprint": "f3a1b2c4d5e6f7a8",
+      "last_seen_at": "2026-05-16T03:14:50Z",
+      "created_at": "2026-05-16T03:14:50Z",
+      "attempts": 1,
+      "do_not_touch": [
+        ".gitignore",
+        "E/",
+        "anthropic-harness-video/",
+        "langchain-agent-harness/",
+        "langchain-agent-lifecycle/",
+        "langchain-agent-runtime/",
+        "langchain-agentic-engineering/"
+      ],
+      "branch": "team/T-7-create-evals-l0-checks",
+      "pr": "https://github.com/AILatentspace1/garden-skills/pull/2",
+      "dod": [
+        {
+          "id": "evals-dir-exists",
+          "kind": "exec",
+          "cmd": "test -d skills/web-video-presentation/evals/cases && test -d skills/web-video-presentation/evals/fixtures",
+          "expect_exit": 0
+        },
+        {
+          "id": "l0-script-runnable",
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L0",
+          "expect_exit": 0
+        },
+        {
+          "id": "l0-passes-clean",
+          "kind": "diff-contains",
+          "path": "skills/web-video-presentation/evals/",
+          "pattern": "\"pass\":\\s*true"
+        },
+        {
+          "id": "reviewer-ok",
+          "kind": "scratch-contains",
+          "file": "review.md",
+          "pattern": "^APPROVED$"
+        }
+      ],
+      "dod_results": {
+        "evals-dir-exists": "pass",
+        "l0-script-runnable": "pass",
+        "l0-passes-clean": "pass",
+        "reviewer-ok": "pass"
+      },
+      "next_action": "Merged — PR #2"
+    },
+    {
+      "id": "T-8",
+      "title": "Implement L1 plan/trigger checks and L2 artifact contract checks for web-video-presentation",
+      "skill": "web-video-presentation",
+      "state": "in-progress",
+      "source": "human-directive:PLAN.md",
+      "fingerprint": "a7b8c9d0e1f2a3b4",
+      "last_seen_at": "2026-05-16T03:14:50Z",
+      "created_at": "2026-05-16T03:14:50Z",
+      "attempts": 0,
+      "do_not_touch": [
+        ".gitignore",
+        "E/",
+        "anthropic-harness-video/",
+        "langchain-agent-harness/",
+        "langchain-agent-lifecycle/",
+        "langchain-agent-runtime/",
+        "langchain-agentic-engineering/"
+      ],
+      "branch": "team/T-8-l1-l2-evals",
+      "dod": [
+        {
+          "id": "l1-case-runnable",
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L1 --case skills/web-video-presentation/evals/cases/phase1-short-article.json",
+          "expect_exit": 0
+        },
+        {
+          "id": "l2-good-fixture-passes",
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L2 --target skills/web-video-presentation/evals/fixtures/chapter-basic",
+          "expect_exit": 0
+        },
+        {
+          "id": "l2-invalid-fixture-fails",
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L2 --target skills/web-video-presentation/evals/fixtures/chapter-invalid",
+          "expect_exit": 1
+        },
+        {
+          "id": "architect-plan-ready",
+          "kind": "scratch-contains",
+          "file": "architect.md",
+          "pattern": "^PLAN_READY"
+        },
+        {
+          "id": "reviewer-ok",
+          "kind": "scratch-contains",
+          "file": "review.md",
+          "pattern": "^APPROVED$"
+        }
+      ],
+      "dod_results": {
+        "l1-case-runnable": "pass",
+        "l2-good-fixture-passes": "pass",
+        "l2-invalid-fixture-fails": "pass",
+        "architect-plan-ready": "pass",
+        "reviewer-ok": "pending"
+      },
+      "next_action": "Run reviewer after DoD verification; L1 and L2 executable checks are implemented and passing."
+    },
+    {
+      "id": "T-9",
+      "title": "Implement L3 micro-e2e checks (scaffold + 1 chapter + typecheck + screenshot smoke) for web-video-presentation",
+      "skill": "web-video-presentation",
+      "state": "inbox",
+      "source": "human-directive:PLAN.md",
+      "fingerprint": "b9c0d1e2f3a4b5c6",
+      "last_seen_at": "2026-05-16T03:14:50Z",
+      "created_at": "2026-05-16T03:14:50Z",
+      "attempts": 0,
+      "do_not_touch": [
+        ".gitignore",
+        "E/",
+        "anthropic-harness-video/",
+        "langchain-agent-harness/",
+        "langchain-agent-lifecycle/",
+        "langchain-agent-runtime/",
+        "langchain-agentic-engineering/"
+      ],
+      "branch": null,
+      "dod": [
+        {
+          "id": "l3-fixture-exists",
+          "kind": "exec",
+          "cmd": "test -f skills/web-video-presentation/evals/fixtures/short-article/article.md",
+          "expect_exit": 0
+        },
+        {
+          "id": "l3-script-runnable",
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L3 --fixture short-article --out .tmp/evals/test-run",
+          "expect_exit": 0
+        },
+        {
+          "id": "l3-output-check",
+          "kind": "scratch-contains",
+          "file": "engineer.md",
+          "pattern": "L3.*typecheck.*passed"
+        },
+        {
+          "id": "reviewer-ok",
+          "kind": "scratch-contains",
+          "file": "review.md",
+          "pattern": "^APPROVED$"
+        }
+      ],
+      "dod_results": {},
+      "next_action": "1. Implement L3 in eval-web-video.mjs: scaffold temp Vite project, inject 1 fixture chapter with 3-5 steps, run npm run extract-narrations and npx tsc --noEmit. 2. Optional Playwright smoke (open 1 viewport, check stage non-empty, 16:9 ratio, no white screen). 3. No real TTS, no full video recording. 4. Add --fixture and --out CLI flags for L3. 5. Cleanup temp dirs after run."
+    },
+    {
+      "id": "T-10",
+      "title": "Create SELF-IMPROVEMENT.md with eval level rules and L4 full-e2e definition for web-video-presentation",
+      "skill": "web-video-presentation",
+      "state": "merged",
+      "source": "human-directive:PLAN.md",
+      "fingerprint": "c1d2e3f4a5b6c7d8",
+      "last_seen_at": "2026-05-16T03:14:50Z",
+      "created_at": "2026-05-16T03:14:50Z",
+      "attempts": 1,
+      "do_not_touch": [
+        ".gitignore",
+        "E/",
+        "anthropic-harness-video/",
+        "langchain-agent-harness/",
+        "langchain-agent-lifecycle/",
+        "langchain-agent-runtime/",
+        "langchain-agentic-engineering/"
+      ],
+      "branch": "team/T-10-self-improvement-md",
+      "pr": "https://github.com/AILatentspace1/garden-skills/pull/3",
+      "dod": [
+        {
+          "id": "self-improve-exists",
+          "kind": "exec",
+          "cmd": "test -f skills/web-video-presentation/SELF-IMPROVEMENT.md",
+          "expect_exit": 0
+        },
+        {
+          "id": "self-improve-has-rules",
+          "kind": "diff-contains",
+          "path": "skills/web-video-presentation/SELF-IMPROVEMENT.md",
+          "pattern": "minimum_eval_level"
+        },
+        {
+          "id": "l0-passes",
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L0",
+          "expect_exit": 0
+        },
+        {
+          "id": "reviewer-ok",
+          "kind": "scratch-contains",
+          "file": "review.md",
+          "pattern": "^APPROVED$"
+        }
+      ],
+      "dod_results": {
+        "self-improve-exists": "pass",
+        "self-improve-has-rules": "pass",
+        "l0-passes": "pass",
+        "reviewer-ok": "pass"
+      },
+      "next_action": "Merged - PR #3"
+    }
+  ],
+  "locks": {},
+  "soft_guard_enabled": false,
+  "stats": {
+    "ignored_low_priority_signals": 0,
+    "total_heartbeats": 8,
+    "total_prs_opened": 2
+  }
+}
