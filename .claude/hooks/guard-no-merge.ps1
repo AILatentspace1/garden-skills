@@ -49,8 +49,9 @@ foreach ($sub in $subCommands) {
     $sub = $sub.Trim()
     if (-not $sub) { continue }
 
-    # Rule 1: git push to main / master (as a standalone token, not inside quoted string)
-    if ($sub -match '^\s*git\s+push\b.*\b(main|master)\b') {
+    # Rule 1: git push to main / master only when the destination ref is exactly
+    # main/master, e.g. `git push origin main` or `git push origin HEAD:main`.
+    if ($sub -match '^\s*git\s+push\b.*(?:^|\s)(?:\S+:)?(main|master)\s*$') {
         Deny "pushing to main/master is forbidden by team policy (use team/T-* branches)"
     }
 
