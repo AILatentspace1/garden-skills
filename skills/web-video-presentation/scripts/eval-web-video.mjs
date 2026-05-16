@@ -309,7 +309,7 @@ function main() {
   const { evidence, failures } = runner(opts);
 
   const totalChecks = Object.keys(evidence).length;
-  const passedChecks = Object.values(evidence).filter(r => r.pass !== false).length;
+  const passedChecks = Object.values(evidence).filter(r => r.pass === true).length;
   const score = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) / 100 : 0;
   const pass = failures.length === 0;
 
