@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-16T14:39:37.197529+08:00",
+  "updated_at": "2026-05-16T14:40:55.733449+08:00",
   "tasks": [
     {
       "id": "T-7",
@@ -61,7 +61,7 @@
       "id": "T-8",
       "title": "Implement L1 plan/trigger checks and L2 artifact contract checks for web-video-presentation",
       "skill": "web-video-presentation",
-      "state": "in-progress",
+      "state": "pr-open",
       "source": "human-directive:PLAN.md",
       "fingerprint": "a7b8c9d0e1f2a3b4",
       "last_seen_at": "2026-05-16T03:14:50Z",
@@ -116,7 +116,8 @@
         "architect-plan-ready": "pass",
         "reviewer-ok": "pass"
       },
-      "next_action": "All DoD passed; open or update draft PR."
+      "next_action": "Draft PR open - awaiting CI and review",
+      "pr": "https://github.com/AILatentspace1/garden-skills/pull/4"
     },
     {
       "id": "T-9",
@@ -228,6 +229,6 @@
   "stats": {
     "ignored_low_priority_signals": 0,
     "total_heartbeats": 8,
-    "total_prs_opened": 2
+    "total_prs_opened": 3
   }
 }
