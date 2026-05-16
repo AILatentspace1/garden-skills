@@ -1,0 +1,21 @@
+{
+  "id": "phase1-short-article",
+  "level": "L1",
+  "description": "Validate that a short Chinese tech article can pass Phase 1 (script + outline generation) without errors.",
+  "fixture": "fixtures/short-article",
+  "expected": {
+    "phase": "phase1",
+    "outputs": ["script.md", "outline.md"],
+    "script_constraints": {
+      "has_markers": true,
+      "markers": ["【停顿】", "【重音】"],
+      "language": "zh-CN"
+    },
+    "outline_constraints": {
+      "has_chapters": true,
+      "no_animation_descriptions": true,
+      "has_info_pool": true
+    }
+  },
+  "timeout_ms": 120000
+}

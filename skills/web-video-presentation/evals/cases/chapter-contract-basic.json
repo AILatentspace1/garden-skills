@@ -1,0 +1,32 @@
+{
+  "id": "chapter-contract-basic",
+  "level": "L2",
+  "description": "Validate chapter artifact contract: .tsx + .css + narrations.ts existence, structure, and content rules.",
+  "fixture": "fixtures/chapter-basic",
+  "expected": {
+    "phase": "phase2-chapter",
+    "contracts": {
+      "file_structure": {
+        "chapter_tsx": true,
+        "chapter_css": true,
+        "narrations_ts": true
+      },
+      "narrations_contract": {
+        "narrations_match_max_step": true,
+        "export_default_array": true,
+        "no_empty_strings": true
+      },
+      "css_contract": {
+        "no_hardcoded_hex": true,
+        "no_hardcoded_rgb": true,
+        "no_hardcoded_font_family": true,
+        "uses_design_tokens": true
+      },
+      "visual_elements": {
+        "has_svg_or_component": true,
+        "not_pure_text": true
+      }
+    }
+  },
+  "timeout_ms": 60000
+}
