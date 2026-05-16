@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-16T14:38:48.934782+08:00",
+  "updated_at": "2026-05-16T14:39:37.197529+08:00",
   "tasks": [
     {
       "id": "T-7",
@@ -114,9 +114,9 @@
         "l2-good-fixture-passes": "pass",
         "l2-invalid-fixture-fails": "pass",
         "architect-plan-ready": "pass",
-        "reviewer-ok": "pending"
+        "reviewer-ok": "pass"
       },
-      "next_action": "Run reviewer after DoD verification; L1 and L2 executable checks are implemented and passing."
+      "next_action": "All DoD passed; open or update draft PR."
     },
     {
       "id": "T-9",
