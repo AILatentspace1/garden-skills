@@ -1,0 +1,28 @@
+{
+  "id": "audio-contract-basic",
+  "level": "L2",
+  "description": "Validate audio pipeline contract: narrations extraction, segments.json structure, and TTS readiness.",
+  "fixture": "fixtures/chapter-basic",
+  "expected": {
+    "phase": "phase3-audio",
+    "contracts": {
+      "narrations_extraction": {
+        "script_exists": true,
+        "can_extract_narrations": true,
+        "narration_format_valid": true
+      },
+      "segments_json": {
+        "has_text_field": true,
+        "has_duration_field": true,
+        "segments_ordered": true,
+        "no_empty_segments": true
+      },
+      "tts_readiness": {
+        "text_is_plain_chinese": true,
+        "no_unsupported_markers": true,
+        "pause_markers_stripped": true
+      }
+    }
+  },
+  "timeout_ms": 60000
+}
