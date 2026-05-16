@@ -7,7 +7,7 @@
  *   L0 - Static checks (file existence, link integrity, schema validation)
  *   L1 - Plan/trigger checks (stub)
  *   L2 - Artifact contract checks (stub)
- *   L3 - Micro E2E checks (stub)
+ *   L3 - Micro E2E checks (fixture-to-contract smoke)
  *   L4 - Full E2E checks (manual only, not implemented here)
  *
  * Usage:
@@ -112,6 +112,26 @@ function maxStep(source) {
 
 function relativeSkillPath(p) {
   return p.replace(SKILL_ROOT + '\\', '').replace(SKILL_ROOT + '/', '').replaceAll('\\', '/');
+}
+
+function articleBlocks(source) {
+  return source
+    .split(/\r?\n\s*\r?\n/)
+    .map(block => block.trim())
+    .filter(Boolean);
+}
+
+function articleTitle(source) {
+  const match = source.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : null;
+}
+
+function deriveChapterTitles(blocks) {
+  return blocks
+    .filter(block => !block.startsWith('#'))
+    .map(block => block.replace(/\s+/g, ' ').split(/[。.!?]/)[0].trim())
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 // ---------------------------------------------------------------------------
@@ -476,11 +496,77 @@ function runL2(opts) {
   return { evidence, failures };
 }
 
-function runL3(_opts) {
-  return {
-    evidence: { note: 'L3 checks not yet implemented (T-9)' },
-    failures: ['L3 checks not yet implemented'],
+function runL3(opts) {
+  const fixtureName = opts.fixture || 'short-article';
+  const fixtureDir = resolveSkillPath(join('evals', 'fixtures', fixtureName));
+  const articlePath = fixtureDir ? join(fixtureDir, 'article.md') : null;
+  const evidence = {};
+  const failures = [];
+
+  evidence.fixture = {
+    pass: Boolean(fixtureDir && fileExists(fixtureDir) && fileExists(articlePath)),
+    fixture: fixtureName,
+    article: articlePath ? relativeSkillPath(articlePath) : null,
   };
+  if (!evidence.fixture.pass) {
+    failures.push(`L3 fixture must exist and include article.md: ${fixtureName}`);
+    return { evidence, failures };
+  }
+
+  const article = readText(articlePath);
+  const blocks = articleBlocks(article);
+  const title = articleTitle(article);
+  const chapterTitles = deriveChapterTitles(blocks);
+
+  evidence.article = {
+    pass: Boolean(title) && blocks.length >= 4 && chapterTitles.length >= 3,
+    title,
+    block_count: blocks.length,
+    derived_chapter_count: chapterTitles.length,
+  };
+  if (!evidence.article.pass) {
+    failures.push('L3 article fixture must have a title and enough body blocks for 3 chapters');
+  }
+
+  const scriptSections = chapterTitles.map((chapterTitle, index) => ({
+    marker: `## Chapter ${index + 1}`,
+    title: chapterTitle,
+  }));
+  evidence.scriptDraft = {
+    pass: scriptSections.length === 3
+      && scriptSections.every(section => /^##\s+Chapter\s+\d+$/.test(section.marker) && section.title.length > 0),
+    sections: scriptSections,
+  };
+  if (!evidence.scriptDraft.pass) {
+    failures.push('L3 script draft must derive 3 stable chapter sections');
+  }
+
+  const outlineChapters = scriptSections.map((section, index) => ({
+    id: `chapter-${index + 1}`,
+    title: section.title,
+    info_pool: [title, section.title].filter(Boolean),
+  }));
+  evidence.outlineDraft = {
+    pass: outlineChapters.length === 3
+      && outlineChapters.every(chapter => chapter.info_pool.length >= 2)
+      && !/\b(animation|animate|transition|fade|wipe|blur|spring|easing)\b/i.test(JSON.stringify(outlineChapters)),
+    chapters: outlineChapters,
+  };
+  if (!evidence.outlineDraft.pass) {
+    failures.push('L3 outline draft must derive chapters with info_pool and no animation prescriptions');
+  }
+
+  const artifactContract = runL2({ ...opts, target: 'evals/fixtures/chapter-basic' });
+  evidence.artifactContract = {
+    pass: artifactContract.failures.length === 0,
+    target: 'evals/fixtures/chapter-basic',
+    checked_chapters: artifactContract.evidence.chapters?.length || 0,
+  };
+  if (!evidence.artifactContract.pass) {
+    failures.push(...artifactContract.failures.map(failure => `L3 artifact contract: ${failure}`));
+  }
+
+  return { evidence, failures };
 }
 
 // ---------------------------------------------------------------------------
