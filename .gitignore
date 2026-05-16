@@ -28,3 +28,10 @@ dist/release/
 garden-gpt-image-2/
 
 .agents/
+.team/
+.claude/
+anthropic-harness-video/
+langchain-agent-harness/
+langchain-agent-lifecycle/
+langchain-agent-runtime/
+langchain-agentic-engineering/
