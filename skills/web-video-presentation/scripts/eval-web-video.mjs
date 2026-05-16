@@ -115,24 +115,38 @@ function checkReferencesLinks() {
 function checkSelfImprovement() {
   if (!fileExists(SELF_IMPROVEMENT_MD)) {
     return {
-      pass: true,
-      note: 'T-10 dependency: SELF-IMPROVEMENT.md not yet created',
+      pass: false,
       fileExists: false,
+      error: 'SELF-IMPROVEMENT.md is required (see skill self-improvement protocol)',
     };
   }
 
   const content = readText(SELF_IMPROVEMENT_MD);
+
+  // Required structural markers
   const hasMinLevel = content.includes('minimum_eval_level');
   const hasScope = content.includes('scope');
+  const hasFullRun = content.includes('full_run_required');
+  const hasLevelDescriptions = /L[0-4]/.test(content);
+
+  // Required content sections
+  const missing = [];
+  if (!hasMinLevel) missing.push('minimum_eval_level');
+  if (!hasScope) missing.push('scope');
+  if (!hasFullRun) missing.push('full_run_required');
+  if (!hasLevelDescriptions) missing.push('level descriptions (L0-L4)');
 
   return {
-    pass: hasMinLevel && hasScope,
+    pass: missing.length === 0,
     fileExists: true,
     hasMinLevel,
     hasScope,
-    note: hasMinLevel && hasScope
-      ? 'SELF-IMPROVEMENT.md present with required fields'
-      : 'SELF-IMPROVEMENT.md present but missing required fields',
+    hasFullRun,
+    hasLevelDescriptions,
+    missing,
+    note: missing.length === 0
+      ? 'SELF-IMPROVEMENT.md present with all required fields'
+      : `SELF-IMPROVEMENT.md missing required fields: ${missing.join(', ')}`,
   };
 }
 
@@ -309,7 +323,7 @@ function main() {
   const { evidence, failures } = runner(opts);
 
   const totalChecks = Object.keys(evidence).length;
-  const passedChecks = Object.values(evidence).filter(r => r.pass === true).length;
+  const passedChecks = Object.values(evidence).filter(r => r.pass !== false).length;
   const score = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) / 100 : 0;
   const pass = failures.length === 0;
 
