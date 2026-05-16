@@ -1,0 +1,24 @@
+.design-token-chapter {
+  min-height: 100%;
+  display: grid;
+  gap: var(--space-6);
+  align-content: center;
+  color: var(--color-ink);
+  background: var(--color-paper);
+}
+
+.design-token-chapter__headline {
+  font: var(--font-display);
+  color: var(--color-ink);
+}
+
+.design-token-chapter__map {
+  width: min(72vw, 44rem);
+  stroke: var(--color-accent);
+  fill: none;
+  stroke-width: 4;
+}
+
+.design-token-chapter__caption {
+  color: var(--color-muted);
+}
