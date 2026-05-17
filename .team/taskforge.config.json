@@ -9,9 +9,9 @@
   "remote": "origin",
   "base_branch": "main",
   "github_repo": "AILatentspace1/garden-skills",
-  "north_star": "Optimize and maintain the skills in this repository while keeping changes small, reviewable, and locally verifiable.",
+  "north_star": "Improve only the web-video-presentation skill while keeping changes small, reviewable, eval-driven, and locally verifiable.",
   "allowed_paths": [
-    "skills/**"
+    "skills/web-video-presentation/**"
   ],
   "runtime_state_gitignored": true
 }
