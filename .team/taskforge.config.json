@@ -1,17 +1,32 @@
 {
   "version": 1,
   "system_name": "TaskForge",
-  "system_repo": "E:\\workspace\\TaskForge",
-  "prompt_source": "E:\\workspace\\TaskForge\\prompts",
-  "runtime_dir": "E:\\workspace\\garden-skills\\.team",
-  "target_repo": "E:\\workspace\\garden-skills",
+  "system_repo": "/Users/garyliu/workspace/TaskForge",
+  "prompt_source": "/Users/garyliu/workspace/TaskForge/prompts",
+  "runtime_dir": "/Users/garyliu/workspace/garden-skills/.team",
+  "target_repo": "/Users/garyliu/workspace/garden-skills",
   "project_name": "garden-skills",
   "remote": "origin",
   "base_branch": "main",
   "github_repo": "AILatentspace1/garden-skills",
-  "north_star": "Improve only the web-video-presentation skill while keeping changes small, reviewable, eval-driven, and locally verifiable.",
+  "north_star": "Improve garden-skills with small, reviewable, locally verifiable changes. Focus on skill quality, documentation, and developer experience.",
   "allowed_paths": [
-    "skills/web-video-presentation/**"
+    "skills/**",
+    "docs/**",
+    "examples/**",
+    "prompts/**",
+    "schemas/**",
+    "scripts/**",
+    "website/**"
   ],
+  "platforms": ["codex"],
+  "default_platform": "codex",
+  "automations": {
+    "codex": {
+      "planner": "team-planner.codex.md",
+      "heartbeat": "team-heartbeat.codex.md",
+      "retro": "team-retro.codex.md"
+    }
+  },
   "runtime_state_gitignored": true
 }

@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated_at": "2026-05-17T10:41:39.7116424+08:00",
+  "version": 3,
+  "updated_at": "2026-05-17T06:23:50.048Z",
   "goals": [
     {
       "id": "garden-skills-continuous-improvement",
@@ -89,7 +89,9 @@
         "last_pushed_sha": null,
         "pr_head_sha": null,
         "updated_at": null
-      }
+      },
+      "created_by_platform": "codex",
+      "last_platform": "codex"
     },
     {
       "id": "T-0008",
@@ -182,7 +184,9 @@
         "last_pushed_sha": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
         "pr_head_sha": null,
         "updated_at": "2026-05-17T08:38:45.8606821+08:00"
-      }
+      },
+      "created_by_platform": "codex",
+      "last_platform": "codex"
     },
     {
       "id": "T-0009",
@@ -263,7 +267,9 @@
         "last_pushed_sha": "1214fabbfa2de7d8e23a0636269bf52b4a6804c1",
         "pr_head_sha": "1214fabbfa2de7d8e23a0636269bf52b4a6804c1",
         "updated_at": "2026-05-17T08:55:20.2271293+08:00"
-      }
+      },
+      "created_by_platform": "codex",
+      "last_platform": "codex"
     },
     {
       "id": "T-0010",
@@ -346,7 +352,9 @@
         "last_pushed_sha": null,
         "pr_head_sha": null,
         "updated_at": null
-      }
+      },
+      "created_by_platform": "codex",
+      "last_platform": "codex"
     },
     {
       "id": "T-0011",
@@ -429,7 +437,9 @@
         "last_pushed_sha": null,
         "pr_head_sha": null,
         "updated_at": null
-      }
+      },
+      "created_by_platform": "codex",
+      "last_platform": "codex"
     },
     {
       "id": "T-0012",
@@ -512,7 +522,9 @@
         "last_pushed_sha": null,
         "pr_head_sha": null,
         "updated_at": null
-      }
+      },
+      "created_by_platform": "codex",
+      "last_platform": "codex"
     }
   ],
   "locks": {},
