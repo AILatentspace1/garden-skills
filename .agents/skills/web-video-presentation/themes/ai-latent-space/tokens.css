@@ -1,0 +1,80 @@
+/* ─────────────────────────────────────────────────────────────────────
+ * Theme · ai-latent-space
+ *   Deep navy stage + electric-to-sky blue gradient accent.
+ *   Inter (weight 300–900) + JetBrains Mono. Neural dot grid baked
+ *   into the stage surface — two-scale radial dots suggest latent-space
+ *   node topology. Glass cards with sky-blue border glow. Hero numbers:
+ *   Inter weight-800, -0.04em tracking — decisive and modern.
+ *
+ *   character knobs:
+ *     • hero numbers   — Inter 800, tight -0.04em, no italic
+ *     • rule           — 1px solid sky-blue tint
+ *     • card           — 16px radius, dark glass + blue border glow
+ *     • surface        — Canvas dot grid with noise-driven brightness flow
+ *     • motion         — Apple-standard ease, medium pace (400/700/1000ms)
+ *
+ *   Brand palette (reference):
+ *     Navy #0a0f2e · Electric Blue #1d4ed8 · Sky Blue #61aaf2
+ *     Mist #8cc4ff · Amber #f59e0b
+ *
+ *   Dot flow defaults (DotFlowCanvas):
+ *     waveCount=1  speed=2.0  threshold=-0.3
+ *     brightAlpha=0.60  dimAlpha=0.19
+ * ───────────────────────────────────────────────────────────────────── */
+:root {
+  /* ─── palette ─── */
+  --shell:        #050918;           /* deeper than surface — letterbox recedes */
+  --surface:      #0a0f2e;           /* brand navy — main stage */
+  --surface-2:    #0e1640;           /* elevated cards / code blocks */
+  --surface-3:    #132058;           /* deepest nested panels */
+  --text:         #e8f0fe;           /* cool white — slight blue cast */
+  --text-2:       #a8c0f0;           /* secondary — sky blue mid-tone */
+  --text-mute:    #5a7ab8;           /* muted — readable at label scale */
+  --text-faint:   #2a4170;           /* faint — dividers / disabled */
+  --rule:         rgba(97, 170, 242, 0.15);
+  --accent:       #61aaf2;           /* Sky Blue — clear on deep navy */
+  --accent-soft:  rgba(97, 170, 242, 0.10);
+  --accent-glow:  rgba(97, 170, 242, 0.42);
+
+  /* ─── fonts ─── */
+  --font-display-cn: "Inter", "Noto Sans SC", -apple-system, sans-serif;
+  --font-display-en: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:       "Inter", "Noto Sans SC", -apple-system, sans-serif;
+  --font-mono:       "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+  --font-features:   "cv01", "ss01", "tnum";   /* Inter: disambig + tabular nums */
+
+  /* ─── motion: Apple-standard ease, medium pace ─── */
+  --dur-base:       400ms;
+  --dur-slow:       700ms;
+  --dur-cinematic:  1000ms;
+
+  /* ─── design identity: modern AI glass ─── */
+  --r-card:        var(--r-md);        /* 16px — modern SaaS / clean */
+  --r-stage:       0;
+  --rule-w:        1px;
+  --rule-style:    solid;              /* clean hairline, no dashes */
+  --hero-num-font:    var(--font-display-en);
+  --hero-num-style:   normal;
+  --hero-num-weight:  800;             /* SIGNATURE — decisive, bold */
+  --hero-num-track:   -0.04em;         /* tight like Inter display */
+  --stage-pad-x:   100px;
+  --stage-pad-y:   76px;
+  --card-shadow:
+    0 0 0 1px rgba(97, 170, 242, 0.14),   /* SIGNATURE — sky-blue glow border */
+    0 8px 40px rgba(5, 9, 24, 0.70);
+  --card-glass-bg:     rgba(14, 22, 64, 0.65);
+  --card-glass-border: rgba(97, 170, 242, 0.18);
+  --shadow-stage:
+    0 80px 200px rgba(5, 9, 24, 0.75),
+    0 0 0 1px rgba(97, 170, 242, 0.07);
+
+  /* ─── decoration: Canvas dot grid (DotFlowCanvas component) ─── */
+  /* CSS pattern disabled — canvas handles per-dot brightness via sine noise.
+     --dot-flow: 1 is the opt-in flag; themes without it skip Canvas entirely. */
+  --surface-pattern: none;
+  --dot-flow:        1;
+
+  /* Spotlight vignette — darkens edges, focuses viewer on center stage */
+  --surface-vignette:
+    radial-gradient(ellipse 78% 68% at 50% 50%, transparent 25%, rgba(5, 9, 24, 0.68) 100%);
+}

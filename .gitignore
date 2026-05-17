@@ -26,11 +26,6 @@ dist/release/
 
 # Skill runtime artifacts
 garden-gpt-image-2/
-
-.agents/
-
-.team/
-.claude/
 .tmp/
 anthropic-harness-video/
 langchain-agent-harness/

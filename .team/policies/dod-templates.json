@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "_doc": "DoD templates. team-architect picks one by task type and substitutes {skill} with the target skill name.",
+  "templates": {
+    "bug-fix": {
+      "description": "Bug fix inside a skill",
+      "dod": [
+        { "id": "lint",            "kind": "exec",                  "cmd": "pnpm run lint",     "expect_exit": 0 },
+        { "id": "validate",        "kind": "exec",                  "cmd": "pnpm run validate", "expect_exit": 0 },
+        { "id": "manifest-bumped", "kind": "diff-contains",         "path_template": "skills/{skill}/manifest.json", "pattern": "\"version\":" },
+        { "id": "changelog",       "kind": "diff-line-count-gte",   "path_template": "skills/{skill}/CHANGELOG.md", "min": 3 },
+        { "id": "reviewer-ok",     "kind": "scratch-contains",      "file": "review.md", "pattern": "^APPROVED$" },
+        { "id": "qa-smoke",        "kind": "scratch-contains",      "file": "qa.md",     "pattern": "^SMOKE_OK$" }
+      ]
+    },
+    "doc-sync": {
+      "description": "Documentation sync (README/CHANGELOG/SKILL.md)",
+      "dod": [
+        { "id": "validate",        "kind": "exec",                  "cmd": "pnpm run validate", "expect_exit": 0 },
+        { "id": "changelog",       "kind": "diff-line-count-gte",   "path_template": "skills/{skill}/CHANGELOG.md", "min": 3 },
+        { "id": "reviewer-ok",     "kind": "scratch-contains",      "file": "review.md", "pattern": "^APPROVED$" }
+      ]
+    },
+    "manifest-fix": {
+      "description": "Manifest schema/consistency fix only",
+      "dod": [
+        { "id": "validate",        "kind": "exec",                  "cmd": "pnpm run validate", "expect_exit": 0 },
+        { "id": "manifest-changed","kind": "diff-contains",         "path_template": "skills/{skill}/manifest.json", "pattern": "." },
+        { "id": "reviewer-ok",     "kind": "scratch-contains",      "file": "review.md", "pattern": "^APPROVED$" }
+      ]
+    },
+    "description-tune": {
+      "description": "Tune skill description / examples / SKILL.md frontmatter",
+      "dod": [
+        { "id": "validate",        "kind": "exec",                  "cmd": "pnpm run validate", "expect_exit": 0 },
+        { "id": "reviewer-ok",     "kind": "scratch-contains",      "file": "review.md", "pattern": "^APPROVED$" }
+      ]
+    },
+    "test-add": {
+      "description": "Add tests inside a skill",
+      "dod": [
+        { "id": "lint",            "kind": "exec",                  "cmd": "pnpm run lint",     "expect_exit": 0 },
+        { "id": "validate",        "kind": "exec",                  "cmd": "pnpm run validate", "expect_exit": 0 },
+        { "id": "new-test-file",   "kind": "diff-contains",         "path_template": "skills/{skill}/", "pattern": "\\.test\\." },
+        { "id": "reviewer-ok",     "kind": "scratch-contains",      "file": "review.md", "pattern": "^APPROVED$" }
+      ]
+    }
+  }
+}

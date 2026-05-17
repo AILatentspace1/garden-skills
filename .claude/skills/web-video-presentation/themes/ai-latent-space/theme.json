@@ -1,0 +1,56 @@
+{
+  "id": "ai-latent-space",
+  "name": "AI Latent Space",
+  "nameZh": "AI 潜空间",
+  "description": "Deep navy + electric-to-sky blue gradient. Inter + JetBrains Mono. Neural dot grid with noise-driven brightness flow creates organic light shapes drifting across the stage. Glass cards with blue border glow, ultra-bold hero numbers. Modern AI/tech aesthetic.",
+  "descriptionZh": "深海军蓝底 + 电蓝→天蓝渐变强调色。Inter + JetBrains Mono。基于噪声亮度的神经节点点阵，亮点构成有机形状在舞台上缓缓飘动。玻璃质感卡片带蓝色边框光晕，超粗 Hero 数字。现代 AI / 科技气质。",
+  "mood": [
+    "dark",
+    "tech",
+    "AI",
+    "neural",
+    "modern",
+    "glass",
+    "electric",
+    "navy"
+  ],
+  "bestFor": [
+    "AI 技术介绍",
+    "数据科学",
+    "产品发布",
+    "前沿研究",
+    "科技演讲",
+    "大模型 / LLM",
+    "工程 + 学术混合内容"
+  ],
+  "preview": {
+    "shell": "#050918",
+    "surface": "#0a0f2e",
+    "text": "#e8f0fe",
+    "accent": "#61aaf2"
+  },
+  "dotFlow": {
+    "description": "Canvas 绘制的两尺度点阵背景，正弦噪声控制每个点亮度，亮点构成不规则有机形状并缓缓飘动",
+    "defaults": {
+      "waveCount": 1,
+      "speed": 2.0,
+      "threshold": -0.3,
+      "brightAlpha": 0.60,
+      "dimAlpha": 0.19
+    },
+    "waves": [
+      { "fx": 0.011, "fy": 0.007,  "vx":  0.22, "vy":  0.13, "amp": 0.42 },
+      { "fx": 0.018, "fy": -0.013, "vx": -0.13, "vy":  0.18, "amp": 0.34 },
+      { "fx": 0.006, "fy": 0.019,  "vx":  0.09, "vy": -0.08, "amp": 0.24 },
+      { "fx": 0.014, "fy": -0.009, "vx":  0.17, "vy": -0.11, "amp": 0.28 },
+      { "fx": 0.008, "fy": 0.016,  "vx": -0.10, "vy":  0.15, "amp": 0.20 }
+    ],
+    "grid": {
+      "largeStep": 48,
+      "largeR": 1.5,
+      "smallStep": 16,
+      "smallR": 1.0
+    },
+    "color": "97,170,242"
+  }
+}

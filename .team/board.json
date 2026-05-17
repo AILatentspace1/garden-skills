@@ -1,0 +1,539 @@
+{
+  "version": 2,
+  "updated_at": "2026-05-17T10:41:39.7116424+08:00",
+  "goals": [
+    {
+      "id": "garden-skills-continuous-improvement",
+      "file": ".team/goals/current.md",
+      "status": "active"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T-0007",
+      "title": "Add L2 audio contract validation (audio-contract-basic) to web-video-presentation eval",
+      "goal_id": "garden-skills-continuous-improvement",
+      "skill": "web-video-presentation",
+      "state": "planned",
+      "source": "goal:.team/goals/current.md",
+      "fingerprint": "9478a4a30a0422b10b92ae70545b707c2e58d5a3b8b8f2f3759880bf81805dfe",
+      "priority": "P1",
+      "why": "L2 currently validates chapter artifacts but not the audio pipeline contract; adding audio-contract-basic reduces drift between narrations.ts and audio-segments.json readiness.",
+      "key_files": [
+        "skills/web-video-presentation/scripts/eval-web-video.mjs",
+        "skills/web-video-presentation/evals/cases/audio-contract-basic.json",
+        "skills/web-video-presentation/templates/extract-narrations.ts"
+      ],
+      "created_at": "2026-05-16T16:16:48.008+08:00",
+      "last_seen_at": "2026-05-16T16:16:48.008+08:00",
+      "last_touched_at": "2026-05-17T10:41:39.7089210+08:00",
+      "attempts": 1,
+      "do_not_touch": [
+        ".tmp/"
+      ],
+      "pr": null,
+      "blocked_by": [],
+      "dod": [
+        {
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L2 --case=skills/web-video-presentation/evals/cases/audio-contract-basic.json",
+          "id": "dod-l2-audio-case-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "diff-contains",
+          "path": "skills/web-video-presentation/scripts/eval-web-video.mjs",
+          "pattern": "audio-contract-basic",
+          "id": "dod-audio-check-implemented"
+        },
+        {
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L2 --target=skills/web-video-presentation/evals/fixtures/chapter-invalid",
+          "id": "dod-l2-invalid-fails",
+          "expect_exit": 1
+        },
+        {
+          "kind": "scratch-contains",
+          "pattern": "^APPROVED$",
+          "id": "review-approved",
+          "file": "gstack-review.md"
+        },
+        {
+          "kind": "scratch-contains",
+          "pattern": "^(SMOKE_OK|NOT_APPLICABLE)$",
+          "id": "qa-smoke",
+          "file": "gstack-qa.md"
+        }
+      ],
+      "dod_results": {},
+      "quality_gates": {
+        "review": "pending",
+        "qa": "pending",
+        "ship_ready": "pending"
+      },
+      "gstack_artifacts": {
+        "plan": ".team/scratch/T-0007/plan.md",
+        "review_report": null,
+        "qa_report": null,
+        "pr_body_evidence": null
+      },
+      "next_action": "Git permissions fixed for .git. Proceed with planned implementation: extend runL2 to accept --case and implement audio contract checks (narrations extraction, segments JSON shape, marker sanitization).",
+      "branch_metadata": {
+        "base_remote": "origin",
+        "base_branch": "main",
+        "branch": null,
+        "merge_base": null,
+        "base_sha": null,
+        "head_sha": null,
+        "last_commit_sha": null,
+        "last_pushed_sha": null,
+        "pr_head_sha": null,
+        "updated_at": null
+      }
+    },
+    {
+      "id": "T-0008",
+      "title": "Implement L3 micro E2E eval for web-video-presentation",
+      "goal_id": "garden-skills-continuous-improvement",
+      "skill": "web-video-presentation",
+      "state": "completed",
+      "source": "goal:.team/goals/current.md",
+      "fingerprint": "51b81660e3b78841d50cac9d3f2bc16d5dae3327832890384f7c7b765706d86c",
+      "priority": "P1",
+      "why": "L3 is currently unimplemented; adding a deterministic micro E2E unlocks safe iteration on templates and chapter contracts without full-length runs.",
+      "key_files": [
+        "skills/web-video-presentation/scripts/eval-web-video.mjs",
+        "skills/web-video-presentation/evals/fixtures/short-article",
+        "skills/web-video-presentation/templates"
+      ],
+      "created_at": "2026-05-16T16:16:48.008+08:00",
+      "last_seen_at": "2026-05-16T16:16:48.008+08:00",
+      "last_touched_at": "2026-05-17T08:38:45.8606821+08:00",
+      "attempts": 1,
+      "do_not_touch": [],
+      "pr": null,
+      "blocked_by": [],
+      "dod": [
+        {
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L3 --fixture=short-article",
+          "id": "dod-l3-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L0",
+          "id": "dod-l0-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "scratch-contains",
+          "pattern": "^APPROVED$",
+          "id": "review-approved",
+          "file": "gstack-review.md"
+        },
+        {
+          "kind": "scratch-contains",
+          "pattern": "^(SMOKE_OK|NOT_APPLICABLE)$",
+          "id": "qa-smoke",
+          "file": "gstack-qa.md"
+        },
+        {
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L2 --case=skills/web-video-presentation/evals/cases/chapter-contract-basic.json",
+          "id": "dod-l2-chapter-contract-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "exec",
+          "cmd": "node skills/web-video-presentation/scripts/eval-web-video.mjs --level=L3 --fixture=__missing__",
+          "id": "dod-l3-missing-fixture-fails",
+          "expect_exit": 1
+        }
+      ],
+      "dod_results": {
+        "dod-l0-pass": "pass",
+        "review-approved": "pass",
+        "dod-l3-pass": "pass",
+        "dod-l3-missing-fixture-fails": "pass",
+        "qa-smoke": "pass",
+        "dod-l2-chapter-contract-pass": "pass"
+      },
+      "quality_gates": {
+        "review": "pass",
+        "qa": "pass",
+        "ship_ready": "pending"
+      },
+      "gstack_artifacts": {
+        "plan": ".team/scratch/T-0008/plan.md",
+        "review_report": ".team/scratch/T-0008/gstack-review.md",
+        "qa_report": ".team/scratch/T-0008/gstack-qa.md",
+        "pr_body_evidence": ".team/scratch/T-0008/pr-body.md"
+      },
+      "next_action": "No branch diff vs fork/main; treat as already landed.",
+      "branch_metadata": {
+        "base_remote": "fork",
+        "base_branch": "main",
+        "branch": "team/T-0008-l3-micro-e2e-eval",
+        "merge_base": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
+        "base_sha": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
+        "head_sha": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
+        "last_commit_sha": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
+        "last_pushed_sha": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
+        "pr_head_sha": null,
+        "updated_at": "2026-05-17T08:38:45.8606821+08:00"
+      }
+    },
+    {
+      "id": "T-0009",
+      "title": "Add L0 static eval + SELF_IMPROVEMENT.md for web-design-engineer",
+      "goal_id": "garden-skills-continuous-improvement",
+      "skill": "web-design-engineer",
+      "state": "blocked",
+      "source": "goal:.team/goals/current.md",
+      "fingerprint": "869cb84d4de1d8330278e22420b65081c0a56df67e36ffee24a5dacd6105fbbd",
+      "priority": "P2",
+      "why": "web-design-engineer lacks self-improvement protocol and eval coverage; a fast L0 static check catches broken references and schema drift early.",
+      "key_files": [
+        "skills/web-design-engineer/SKILL.md",
+        "skills/web-design-engineer/references",
+        "skills/web-design-engineer/scripts"
+      ],
+      "created_at": "2026-05-16T16:16:48.008+08:00",
+      "last_seen_at": "2026-05-16T16:16:48.008+08:00",
+      "last_touched_at": "2026-05-17T10:18:21.3057513+08:00",
+      "attempts": 0,
+      "do_not_touch": [
+        ".tmp/"
+      ],
+      "pr": "https://github.com/AILatentspace1/garden-skills/pull/6",
+      "blocked_by": [],
+      "dod": [
+        {
+          "kind": "exec",
+          "cmd": "node skills/web-design-engineer/scripts/eval-web-design-engineer.mjs --level=L0",
+          "id": "dod-eval-l0-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "exec",
+          "cmd": "node -e \"const fs=require(\\\"fs\\\"); const p=\\\"skills/web-design-engineer/SELF-IMPROVEMENT.md\\\"; process.exit(fs.existsSync(p)?0:1)\"",
+          "id": "dod-self-improvement-present",
+          "expect_exit": 0
+        },
+        {
+          "kind": "scratch-contains",
+          "pattern": "^APPROVED$",
+          "id": "review-approved",
+          "file": "gstack-review.md"
+        },
+        {
+          "kind": "scratch-contains",
+          "pattern": "^(SMOKE_OK|NOT_APPLICABLE)$",
+          "id": "qa-smoke",
+          "file": "gstack-qa.md"
+        }
+      ],
+      "dod_results": {
+        "qa-smoke": "pass",
+        "dod-eval-l0-pass": "pass",
+        "review-approved": "pass",
+        "dod-self-improvement-present": "pass"
+      },
+      "quality_gates": {
+        "review": "pass",
+        "qa": "pass",
+        "ship_ready": "pending"
+      },
+      "gstack_artifacts": {
+        "plan": ".team/scratch/T-0009/plan.md",
+        "review_report": ".team/scratch/T-0009/gstack-review.md",
+        "qa_report": ".team/scratch/T-0009/gstack-qa.md",
+        "pr_body_evidence": ".team/scratch/T-0009/pr-body.md"
+      },
+      "next_action": "dirty automation branch requires human cleanup: team/T-0009-web-design-engineer-l0",
+      "branch_metadata": {
+        "base_remote": "origin",
+        "base_branch": "main",
+        "branch": "team/T-0009-web-design-engineer-l0",
+        "merge_base": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
+        "base_sha": "16d46e6c3d982b98ce33a6fd38bbe6f0b25b0882",
+        "head_sha": "1214fabbfa2de7d8e23a0636269bf52b4a6804c1",
+        "last_commit_sha": "1214fabbfa2de7d8e23a0636269bf52b4a6804c1",
+        "last_pushed_sha": "1214fabbfa2de7d8e23a0636269bf52b4a6804c1",
+        "pr_head_sha": "1214fabbfa2de7d8e23a0636269bf52b4a6804c1",
+        "updated_at": "2026-05-17T08:55:20.2271293+08:00"
+      }
+    },
+    {
+      "id": "T-0010",
+      "title": "Add L0 static eval + SELF_IMPROVEMENT.md for gpt-image-2",
+      "goal_id": "garden-skills-continuous-improvement",
+      "skill": "gpt-image-2",
+      "state": "inbox",
+      "source": "goal:.team/goals/current.md",
+      "fingerprint": "e4e15bac7a422125554cf71f09a2e52352ac9de9981cb968f999fec58ead7497",
+      "priority": "P2",
+      "why": "gpt-image-2 has several runtime scripts but no lightweight self-improvement protocol or static eval gate; a local L0 check catches manifest, script, and reference drift before unattended edits.",
+      "key_files": [
+        "skills/gpt-image-2/SKILL.md",
+        "skills/gpt-image-2/SELF-IMPROVEMENT.md",
+        "skills/gpt-image-2/scripts/eval-gpt-image-2.mjs",
+        "skills/gpt-image-2/references"
+      ],
+      "created_at": "2026-05-16T22:09:37.9546817+08:00",
+      "last_seen_at": "2026-05-16T22:09:37.9546817+08:00",
+      "last_touched_at": "2026-05-16T22:09:37.9546817+08:00",
+      "attempts": 0,
+      "do_not_touch": [
+        ".tmp/"
+      ],
+      "pr": null,
+      "blocked_by": [],
+      "dod": [
+        {
+          "kind": "exec",
+          "cmd": "node skills/gpt-image-2/scripts/eval-gpt-image-2.mjs --level=L0",
+          "id": "dod-gpt-image-l0-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "exec",
+          "cmd": "node -e \"const fs=require(\\\"fs\\\"); process.exit(fs.existsSync(\\\"skills/gpt-image-2/SELF-IMPROVEMENT.md\\\")?0:1)\"",
+          "id": "dod-self-improvement-present",
+          "expect_exit": 0
+        },
+        {
+          "kind": "exec",
+          "cmd": "node skills/gpt-image-2/scripts/eval-gpt-image-2.mjs --level=L0 --fixture=missing-reference",
+          "id": "dod-gpt-image-l0-bad-fixture-fails",
+          "expect_exit": 1
+        },
+        {
+          "kind": "scratch-contains",
+          "file": "gstack-review.md",
+          "pattern": "^APPROVED$",
+          "id": "review-approved"
+        },
+        {
+          "kind": "scratch-contains",
+          "file": "gstack-qa.md",
+          "pattern": "^(SMOKE_OK|NOT_APPLICABLE)$",
+          "id": "qa-smoke"
+        }
+      ],
+      "dod_results": {},
+      "quality_gates": {
+        "review": "pending",
+        "qa": "pending",
+        "ship_ready": "pending"
+      },
+      "gstack_artifacts": {
+        "plan": null,
+        "review_report": null,
+        "qa_report": null,
+        "pr_body_evidence": null
+      },
+      "next_action": "Create SELF-IMPROVEMENT.md and scripts/eval-gpt-image-2.mjs with manifest, reference-link, and script entrypoint checks.",
+      "branch_metadata": {
+        "base_remote": "origin",
+        "base_branch": "main",
+        "branch": null,
+        "merge_base": null,
+        "base_sha": null,
+        "head_sha": null,
+        "last_commit_sha": null,
+        "last_pushed_sha": null,
+        "pr_head_sha": null,
+        "updated_at": null
+      }
+    },
+    {
+      "id": "T-0011",
+      "title": "Add L1 reference routing eval for kb-retriever",
+      "goal_id": "garden-skills-continuous-improvement",
+      "skill": "kb-retriever",
+      "state": "inbox",
+      "source": "goal:.team/goals/current.md",
+      "fingerprint": "703eca0660645fc5e95d8357972946c4214047ee64437be096ce11764eeb7fb6",
+      "priority": "P2",
+      "why": "kb-retriever instructions depend on choosing PDF and Excel handling references before search; an offline fixture eval makes that routing behavior objective and locally repeatable.",
+      "key_files": [
+        "skills/kb-retriever/SKILL.md",
+        "skills/kb-retriever/references",
+        "skills/kb-retriever/evals/fixtures/reference-routing",
+        "skills/kb-retriever/scripts/eval-kb-retriever.mjs"
+      ],
+      "created_at": "2026-05-16T22:09:37.9546817+08:00",
+      "last_seen_at": "2026-05-16T22:09:37.9546817+08:00",
+      "last_touched_at": "2026-05-16T22:09:37.9546817+08:00",
+      "attempts": 0,
+      "do_not_touch": [
+        ".tmp/"
+      ],
+      "pr": null,
+      "blocked_by": [],
+      "dod": [
+        {
+          "kind": "exec",
+          "cmd": "node skills/kb-retriever/scripts/eval-kb-retriever.mjs --level=L1 --fixture=reference-routing",
+          "id": "dod-kb-reference-routing-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "exec",
+          "cmd": "node skills/kb-retriever/scripts/eval-kb-retriever.mjs --level=L1 --fixture=missing-reference",
+          "id": "dod-kb-missing-reference-fails",
+          "expect_exit": 1
+        },
+        {
+          "kind": "exec",
+          "cmd": "node -e \"const fs=require(\\\"fs\\\"); for (const p of [\\\"skills/kb-retriever/references/pdf_reading.md\\\",\\\"skills/kb-retriever/references/excel_reading.md\\\",\\\"skills/kb-retriever/references/excel_analysis.md\\\"]) if(!fs.existsSync(p)) process.exit(1)\"",
+          "id": "dod-kb-required-references-present",
+          "expect_exit": 0
+        },
+        {
+          "kind": "scratch-contains",
+          "file": "gstack-review.md",
+          "pattern": "^APPROVED$",
+          "id": "review-approved"
+        },
+        {
+          "kind": "scratch-contains",
+          "file": "gstack-qa.md",
+          "pattern": "^(SMOKE_OK|NOT_APPLICABLE)$",
+          "id": "qa-smoke"
+        }
+      ],
+      "dod_results": {},
+      "quality_gates": {
+        "review": "pending",
+        "qa": "pending",
+        "ship_ready": "pending"
+      },
+      "gstack_artifacts": {
+        "plan": null,
+        "review_report": null,
+        "qa_report": null,
+        "pr_body_evidence": null
+      },
+      "next_action": "Add a small eval fixture with PDF and Excel query cases, then implement an offline evaluator that proves the skill loads the right reference before answering.",
+      "branch_metadata": {
+        "base_remote": "origin",
+        "base_branch": "main",
+        "branch": null,
+        "merge_base": null,
+        "base_sha": null,
+        "head_sha": null,
+        "last_commit_sha": null,
+        "last_pushed_sha": null,
+        "pr_head_sha": null,
+        "updated_at": null
+      }
+    },
+    {
+      "id": "T-0012",
+      "title": "Add planner candidate fingerprint regression check",
+      "goal_id": "garden-skills-continuous-improvement",
+      "skill": "team-planner",
+      "state": "inbox",
+      "source": "goal:.team/goals/current.md",
+      "fingerprint": "33f7ea4baa6af218bae4fd07496107e50aefb7ce45641cd0e29e608de1bdf1c0",
+      "priority": "P2",
+      "why": "Recent recovery work depended on manual board edits; a local planner-side fingerprint check reduces duplicate task promotion risk without touching implementation skills.",
+      "key_files": [
+        ".team/planner/validate-candidates.mjs",
+        ".team/planner/fixtures/duplicate-candidates.jsonl",
+        ".team/planner/candidates.jsonl",
+        ".team/board.json"
+      ],
+      "created_at": "2026-05-16T22:09:37.9546817+08:00",
+      "last_seen_at": "2026-05-16T22:09:37.9546817+08:00",
+      "last_touched_at": "2026-05-16T22:09:37.9546817+08:00",
+      "attempts": 0,
+      "do_not_touch": [
+        ".tmp/"
+      ],
+      "pr": null,
+      "blocked_by": [],
+      "dod": [
+        {
+          "kind": "exec",
+          "cmd": "node .team/planner/validate-candidates.mjs --fixture=.team/planner/fixtures/duplicate-candidates.jsonl",
+          "id": "dod-planner-duplicate-fixture-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "exec",
+          "cmd": "node .team/planner/validate-candidates.mjs --fixture=.team/planner/fixtures/missing-dod-id.jsonl",
+          "id": "dod-planner-invalid-fixture-fails",
+          "expect_exit": 1
+        },
+        {
+          "kind": "exec",
+          "cmd": "node .team/planner/validate-candidates.mjs --board=.team/board.json --candidates=.team/planner/candidates.jsonl",
+          "id": "dod-planner-live-candidates-pass",
+          "expect_exit": 0
+        },
+        {
+          "kind": "scratch-contains",
+          "file": "gstack-review.md",
+          "pattern": "^APPROVED$",
+          "id": "review-approved"
+        },
+        {
+          "kind": "scratch-contains",
+          "file": "gstack-qa.md",
+          "pattern": "^(SMOKE_OK|NOT_APPLICABLE)$",
+          "id": "qa-smoke"
+        }
+      ],
+      "dod_results": {},
+      "quality_gates": {
+        "review": "pending",
+        "qa": "pending",
+        "ship_ready": "pending"
+      },
+      "gstack_artifacts": {
+        "plan": null,
+        "review_report": null,
+        "qa_report": null,
+        "pr_body_evidence": null
+      },
+      "next_action": "Create a small Node validator plus fixtures that fail on missing DoD ids and duplicate fingerprints across board/candidate records.",
+      "branch_metadata": {
+        "base_remote": "origin",
+        "base_branch": "main",
+        "branch": null,
+        "merge_base": null,
+        "base_sha": null,
+        "head_sha": null,
+        "last_commit_sha": null,
+        "last_pushed_sha": null,
+        "pr_head_sha": null,
+        "updated_at": null
+      }
+    }
+  ],
+  "locks": {},
+  "stats": {
+    "ignored_low_priority_signals": 0,
+    "total_planner_runs": 3,
+    "total_candidates_seen": 11,
+    "total_tasks_promoted": 6,
+    "total_heartbeats": 9,
+    "total_prs_opened": 1
+  },
+  "branch_metadata_schema": {
+    "base_remote": "origin",
+    "base_branch": "main",
+    "branch": null,
+    "merge_base": null,
+    "base_sha": null,
+    "head_sha": null,
+    "last_commit_sha": null,
+    "last_pushed_sha": null,
+    "pr_head_sha": null,
+    "updated_at": null
+  }
+}

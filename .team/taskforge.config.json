@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "system_name": "TaskForge",
+  "system_repo": "E:\\workspace\\TaskForge",
+  "prompt_source": "E:\\workspace\\TaskForge\\prompts",
+  "runtime_dir": "E:\\workspace\\garden-skills\\.team",
+  "target_repo": "E:\\workspace\\garden-skills",
+  "project_name": "garden-skills",
+  "remote": "origin",
+  "base_branch": "main",
+  "github_repo": "AILatentspace1/garden-skills",
+  "north_star": "Optimize and maintain the skills in this repository while keeping changes small, reviewable, and locally verifiable.",
+  "allowed_paths": [
+    "skills/**"
+  ],
+  "runtime_state_gitignored": true
+}
