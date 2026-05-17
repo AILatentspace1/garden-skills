@@ -31,6 +31,7 @@ garden-gpt-image-2/
 
 .team/
 .claude/
+.tmp/
 anthropic-harness-video/
 langchain-agent-harness/
 langchain-agent-lifecycle/
