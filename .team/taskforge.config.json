@@ -9,15 +9,9 @@
   "remote": "origin",
   "base_branch": "main",
   "github_repo": "AILatentspace1/garden-skills",
-  "north_star": "Improve garden-skills with small, reviewable, locally verifiable changes. Focus on skill quality, documentation, and developer experience.",
+  "north_star": "Improve only the web-video-presentation skill with small, reviewable, locally verifiable changes. Focus on that skill's quality, documentation, examples, evals, release readiness, and developer experience.",
   "allowed_paths": [
-    "skills/**",
-    "docs/**",
-    "examples/**",
-    "prompts/**",
-    "schemas/**",
-    "scripts/**",
-    "website/**"
+    "skills/web-video-presentation/**"
   ],
   "platforms": ["codex"],
   "default_platform": "codex",
