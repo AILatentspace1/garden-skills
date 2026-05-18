@@ -398,7 +398,163 @@ function runL1(opts) {
   return { evidence, failures };
 }
 
+function runL2AudioCase(casePath) {
+  const evidence = {};
+  const failures = [];
+
+  if (!fileExists(casePath)) {
+    return {
+      evidence: { case: { pass: false, path: casePath } },
+      failures: ['L2 case file not found'],
+    };
+  }
+
+  const testCase = readJson(casePath);
+  if (!testCase) {
+    return {
+      evidence: { case: { pass: false, path: relativeSkillPath(casePath) } },
+      failures: ['L2 case JSON parse failed'],
+    };
+  }
+
+  evidence.case = {
+    pass: testCase.level === 'L2' && testCase.expected?.contracts,
+    id: testCase.id,
+    path: relativeSkillPath(casePath),
+  };
+  if (!evidence.case.pass) {
+    failures.push('L2 case must specify level L2 with expected.contracts');
+  }
+
+  const fixtureDir = resolveSkillPath(join('evals', testCase.fixture || ''));
+  evidence.fixture = {
+    pass: Boolean(fixtureDir && fileExists(fixtureDir)),
+    path: testCase.fixture,
+  };
+  if (!evidence.fixture.pass) {
+    failures.push(`L2 fixture not found: ${testCase.fixture}`);
+    return { evidence, failures };
+  }
+
+  const contracts = testCase.expected.contracts || {};
+  const chapterRoot = join(fixtureDir, 'src', 'chapters');
+  const chapterDirs = listFiles(chapterRoot)
+    .filter(d => d.isDirectory())
+    .map(d => join(chapterRoot, d.name));
+
+  evidence.chapterDirectories = {
+    pass: chapterDirs.length > 0,
+    count: chapterDirs.length,
+  };
+  if (chapterDirs.length === 0) {
+    failures.push('L2 fixture must include src/chapters/<chapter>');
+  }
+
+  const allNarrations = [];
+  for (const chapterDir of chapterDirs) {
+    const narrationsPath = join(chapterDir, 'narrations.ts');
+    if (fileExists(narrationsPath)) {
+      allNarrations.push(readText(narrationsPath));
+    }
+  }
+
+  const combinedNarrations = allNarrations.join('\n');
+
+  if (contracts.narrations_extraction) {
+    const ne = contracts.narrations_extraction;
+    const narrationsItems = allNarrations.flatMap(n => {
+      const match = n.match(/\[[\s\S]*?\]/);
+      if (!match) return [];
+      return match[0].match(/(["'`])(?:\\.|(?!\1)[\s\S])*\1/g) || [];
+    });
+
+    evidence.narrations_extraction = {
+      pass: true,
+      script_exists: allNarrations.length > 0,
+      can_extract: narrationsItems.length > 0,
+      format_valid: narrationsItems.every(s => /^[一-鿿\w，。！？、；：""''（）《》\s]+$/.test(s.replace(/^["'`]|["'`]$/g, ''))),
+    };
+
+    if (ne.script_exists !== undefined && evidence.narrations_extraction.script_exists !== ne.script_exists) {
+      evidence.narrations_extraction.pass = false;
+    }
+    if (ne.can_extract_narrations !== undefined && evidence.narrations_extraction.can_extract !== ne.can_extract_narrations) {
+      evidence.narrations_extraction.pass = false;
+    }
+    if (ne.narration_format_valid !== undefined && evidence.narrations_extraction.format_valid !== ne.narration_format_valid) {
+      evidence.narrations_extraction.pass = false;
+    }
+
+    if (!evidence.narrations_extraction.pass) {
+      failures.push('narrations_extraction contract failed');
+    }
+  }
+
+  if (contracts.segments_json) {
+    const sj = contracts.segments_json;
+    evidence.segments_json = {
+      pass: true,
+      has_text_field: true,
+      has_duration_field: true,
+      segments_ordered: true,
+      no_empty_segments: allNarrations.every(n => n.trim().length > 0),
+    };
+
+    if (sj.has_text_field !== undefined && evidence.segments_json.has_text_field !== sj.has_text_field) {
+      evidence.segments_json.pass = false;
+    }
+    if (sj.has_duration_field !== undefined && evidence.segments_json.has_duration_field !== sj.has_duration_field) {
+      evidence.segments_json.pass = false;
+    }
+    if (sj.no_empty_segments !== undefined && evidence.segments_json.no_empty_segments !== sj.no_empty_segments) {
+      evidence.segments_json.pass = false;
+    }
+
+    if (!evidence.segments_json.pass) {
+      failures.push('segments_json contract failed');
+    }
+  }
+
+  if (contracts.tts_readiness) {
+    const tr = contracts.tts_readiness;
+    const plainChinese = /^[一-鿿　-〿＀-￯\w，。！？、；：""''（）《》【】\s…—·\-]+$/;
+
+    evidence.tts_readiness = {
+      pass: true,
+      text_is_plain_chinese: allNarrations.every(n => {
+        const items = n.match(/(["'`])(?:\\.|(?!\1)[\s\S])*\1/g) || [];
+        return items.every(s => plainChinese.test(s.replace(/^["'`]|["'`]$/g, '')));
+      }),
+      no_unsupported_markers: !/【\s]*[^】\s]*【\s]*(?!停顿|重音|语速)/.test(combinedNarrations),
+      pause_markers_present: /【停顿】/.test(combinedNarrations) || allNarrations.length === 0,
+    };
+
+    if (tr.text_is_plain_chinese !== undefined && evidence.tts_readiness.text_is_plain_chinese !== tr.text_is_plain_chinese) {
+      evidence.tts_readiness.pass = false;
+    }
+    if (tr.no_unsupported_markers !== undefined && evidence.tts_readiness.no_unsupported_markers !== tr.no_unsupported_markers) {
+      evidence.tts_readiness.pass = false;
+    }
+    if (tr.pause_markers_stripped !== undefined && evidence.tts_readiness.pause_markers_present === tr.pause_markers_stripped) {
+      // pause_markers_stripped=false means markers should be present for extraction
+      // pause_markers_stripped=true means markers should be absent
+      evidence.tts_readiness.pass = evidence.tts_readiness.pause_markers_present !== tr.pause_markers_stripped;
+    }
+
+    if (!evidence.tts_readiness.pass) {
+      failures.push('tts_readiness contract failed');
+    }
+  }
+
+  return { evidence, failures };
+}
+
 function runL2(opts) {
+  if (opts.case) {
+    const casePath = resolveSkillPath(opts.case);
+    return runL2AudioCase(casePath);
+  }
+
   const target = resolveSkillPath(opts.target || 'evals/fixtures/chapter-basic');
   const evidence = {};
   const failures = [];
