@@ -6,7 +6,7 @@
  * Levels:
  *   L0 - Static checks (file existence, link integrity, schema validation)
  *   L1 - Plan/trigger checks (stub)
- *   L2 - Artifact contract checks (stub)
+ *   L2 - Artifact contract checks (--case for case-driven, --target for fixture scan)
  *   L3 - Micro E2E checks (fixture-to-contract smoke)
  *   L4 - Full E2E checks (manual only, not implemented here)
  *
@@ -14,6 +14,7 @@
  *   node eval-web-video.mjs --level=L0
  *   node eval-web-video.mjs --level=L0 --out=result.json
  *   node eval-web-video.mjs --level=L2 --target=evals/fixtures/chapter-basic
+ *   node eval-web-video.mjs --level=L2 --case=evals/cases/audio-contract-basic.json
  */
 
 import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
