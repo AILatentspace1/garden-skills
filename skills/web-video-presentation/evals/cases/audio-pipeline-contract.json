@@ -1,0 +1,18 @@
+{
+  "id": "audio-pipeline-contract",
+  "level": "L2",
+  "description": "Validates narrations-to-segments pipeline contract: all chapters have narrations, no empty strings, segments follow schema.",
+  "fixture": "fixtures/chapter-basic",
+  "expected": {
+    "contracts": {
+      "audio_pipeline": {
+        "has_chapters": true,
+        "all_have_narrations": true,
+        "no_empty_narrations": true,
+        "segment_schema_valid": true,
+        "sorted_by_chapter_step": true
+      }
+    }
+  },
+  "timeout_ms": 30000
+}

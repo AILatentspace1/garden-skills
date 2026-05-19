@@ -442,6 +442,83 @@ function checkNarrationMarkers(narrationLines, contracts) {
   return { evidence, failures };
 }
 
+// ---------------------------------------------------------------------------
+// L2 Contract: audio_pipeline
+// ---------------------------------------------------------------------------
+function checkAudioPipeline(fixtureDir, contracts) {
+  const ap = contracts || {};
+  const evidence = {};
+  const failures = [];
+
+  const chapterRoot = join(fixtureDir, 'src', 'chapters');
+  const chapterDirs = listFiles(chapterRoot).filter(d => d.isDirectory()).map(d => d.name);
+
+  evidence.has_chapters = { pass: chapterDirs.length > 0, count: chapterDirs.length };
+  if (!evidence.has_chapters.pass) {
+    failures.push('fixture has no chapters under src/chapters/');
+    return { evidence, failures };
+  }
+
+  let allHaveNarrations = true;
+  let noEmptyNarrations = true;
+  let totalSegments = 0;
+  const segmentSchema = [];
+
+  for (const chDir of chapterDirs) {
+    const nPath = join(chapterRoot, chDir, 'narrations.ts');
+    if (!fileExists(nPath)) {
+      allHaveNarrations = false;
+      continue;
+    }
+    const src = readText(nPath);
+    const m = src.match(/narrations\s*(?::[^=]+)?=\s*\[([\s\S]*?)\]\s*(?:as\s+const)?\s*;?/);
+    if (!m) {
+      allHaveNarrations = false;
+      continue;
+    }
+    const items = m[1].match(/"([^"\\]*(?:\\.[^"\\]*)*)"/g) || [];
+    for (let i = 0; i < items.length; i++) {
+      const text = items[i].replace(/^"|"$/g, '').replace(/\\(.)/g, '$1');
+      if (text.trim() === '') noEmptyNarrations = false;
+      const chapterId = chDir.replace(/^\d+-/, '');
+      segmentSchema.push({ chapter: chapterId, step: i + 1, text, audio: `${chapterId}/${i + 1}.mp3` });
+      totalSegments++;
+    }
+  }
+
+  evidence.all_have_narrations = { pass: allHaveNarrations };
+  if (ap.all_have_narrations !== undefined && allHaveNarrations !== ap.all_have_narrations) {
+    failures.push('some chapters missing narrations.ts');
+  }
+
+  evidence.no_empty_narrations = { pass: noEmptyNarrations, total_segments: totalSegments };
+  if (ap.no_empty_narrations !== undefined && noEmptyNarrations !== ap.no_empty_narrations) {
+    failures.push('some narration strings are empty');
+  }
+
+  let allFieldsOk = true;
+  let sortedOk = true;
+  let prevKey = '';
+  for (const s of segmentSchema) {
+    if (!s.chapter || s.step <= 0 || !s.text || !s.audio) allFieldsOk = false;
+    const key = `${s.chapter}:${s.step}`;
+    if (key < prevKey) sortedOk = false;
+    prevKey = key;
+  }
+
+  evidence.segment_schema_valid = { pass: allFieldsOk };
+  if (ap.segment_schema_valid !== undefined && allFieldsOk !== ap.segment_schema_valid) {
+    failures.push('segment schema validation failed');
+  }
+
+  evidence.sorted_by_chapter_step = { pass: sortedOk };
+  if (ap.sorted_by_chapter_step !== undefined && sortedOk !== ap.sorted_by_chapter_step) {
+    failures.push('segments not sorted by chapter:step');
+  }
+
+  return { evidence, failures };
+}
+
 function runL2(opts) {
   if (opts.case) {
     const casePath = resolveSkillPath(opts.case);
@@ -485,6 +562,12 @@ function runL2(opts) {
       const mf = checkNarrationMarkers(narrationLines, contracts.marker_format);
       evidence.marker_format = mf.evidence;
       if (mf.failures.length > 0) failures.push(...mf.failures);
+    }
+
+    if (contracts.audio_pipeline) {
+      const ap = checkAudioPipeline(fixtureDir, contracts.audio_pipeline);
+      evidence.audio_pipeline = ap.evidence;
+      if (ap.failures.length > 0) failures.push(...ap.failures);
     }
 
     return { evidence, failures };
