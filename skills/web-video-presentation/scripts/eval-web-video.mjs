@@ -426,7 +426,7 @@ function checkNarrationMarkers(narrationLines, contracts) {
 
   evidence.properly_closed = { pass: depth === 0 && !invalidCloseOrder, open: openBrackets, close: closeBrackets };
   if (mf.properly_closed !== undefined && evidence.properly_closed.pass !== mf.properly_closed) {
-    failures.push('marker brackets not properly closed');
+    failures.push(`marker brackets not properly closed (open: ${openBrackets}, close: ${closeBrackets})`);
   }
 
   const markerRegex = /【([^】]+)】/g;
@@ -442,7 +442,7 @@ function checkNarrationMarkers(narrationLines, contracts) {
 
   evidence.no_nesting = { pass: maxDepth <= 1, max_depth: maxDepth };
   if (mf.no_nesting !== undefined && evidence.no_nesting.pass !== mf.no_nesting) {
-    failures.push('nested markers detected');
+    failures.push(`nested markers detected (max depth: ${maxDepth})`);
   }
 
   evidence.known_markers_only = { pass: unknownMarkers.length === 0, found: foundMarkers, unknown: unknownMarkers };
