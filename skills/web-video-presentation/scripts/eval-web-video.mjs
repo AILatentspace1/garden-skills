@@ -57,6 +57,7 @@ function parseArgs(argv) {
     target: args.target || null,
     fixture: args.fixture || null,
     out: args.out || null,
+    output: args.output || 'json',
   };
 }
 
@@ -834,7 +835,15 @@ function main() {
 
   const jsonStr = JSON.stringify(output, null, 2) + '\n';
 
-  process.stdout.write(jsonStr);
+  if (opts.output === 'text') {
+    const status = pass ? 'PASS' : 'FAIL';
+    process.stdout.write(`[${status}] ${opts.level} score=${score} checks=${passedChecks}/${totalChecks}\n`);
+    if (failures.length > 0) {
+      for (const f of failures) process.stdout.write(`  - ${f}\n`);
+    }
+  } else {
+    process.stdout.write(jsonStr);
+  }
 
   if (opts.out) {
     const outPath = resolve(opts.out);
