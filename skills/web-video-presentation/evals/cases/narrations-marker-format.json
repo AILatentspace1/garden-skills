@@ -1,0 +1,18 @@
+{
+  "id": "narrations-marker-format",
+  "level": "L2",
+  "description": "Validate narrations time-marker format: only known markers allowed, properly closed, no nesting.",
+  "fixture": "fixtures/chapter-basic",
+  "expected": {
+    "phase": "phase3-audio",
+    "contracts": {
+      "marker_format": {
+        "known_markers_only": true,
+        "properly_closed": true,
+        "no_nesting": true,
+        "allowed_markers": ["停顿", "重音", "语速"]
+      }
+    }
+  },
+  "timeout_ms": 30000
+}

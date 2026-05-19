@@ -399,6 +399,49 @@ function runL1(opts) {
   return { evidence, failures };
 }
 
+function checkNarrationMarkers(narrationLines, contracts) {
+  const mf = contracts || {};
+  const evidence = {};
+  const failures = [];
+  const allowed = mf.allowed_markers || [];
+  const allCombined = narrationLines.join('\n');
+
+  const openBrackets = (allCombined.match(/【/g) || []).length;
+  const closeBrackets = (allCombined.match(/】/g) || []).length;
+
+  evidence.properly_closed = { pass: openBrackets === closeBrackets, open: openBrackets, close: closeBrackets };
+  if (mf.properly_closed !== undefined && evidence.properly_closed.pass !== mf.properly_closed) {
+    failures.push('marker brackets not properly closed');
+  }
+
+  const markerRegex = /【([^】]+)】/g;
+  let match;
+  const foundMarkers = [];
+  const unknownMarkers = [];
+  let nestingFound = false;
+  let lastEnd = -1;
+  while ((match = markerRegex.exec(allCombined)) !== null) {
+    if (match.index < lastEnd) nestingFound = true;
+    lastEnd = match.index + match[0].length;
+    foundMarkers.push(match[1].trim());
+    if (allowed.length > 0 && !allowed.includes(match[1].trim())) {
+      unknownMarkers.push(match[1].trim());
+    }
+  }
+
+  evidence.no_nesting = { pass: !nestingFound };
+  if (mf.no_nesting !== undefined && evidence.no_nesting.pass !== mf.no_nesting) {
+    failures.push('nested markers detected');
+  }
+
+  evidence.known_markers_only = { pass: unknownMarkers.length === 0, found: foundMarkers, unknown: unknownMarkers };
+  if (mf.known_markers_only !== undefined && evidence.known_markers_only.pass !== mf.known_markers_only) {
+    failures.push(`unknown markers found: ${unknownMarkers.join(', ')}`);
+  }
+
+  return { evidence, failures };
+}
+
 function runL2AudioCase(casePath) {
   const evidence = {};
   const failures = [];
@@ -488,6 +531,14 @@ function runL2AudioCase(casePath) {
 
     if (!evidence.narrations_extraction.pass) {
       failures.push('narrations_extraction contract failed');
+    }
+  }
+
+  if (contracts.marker_format) {
+    const mf = checkNarrationMarkers(allNarrations, contracts.marker_format);
+    evidence.marker_format = mf.evidence;
+    if (mf.failures.length > 0) {
+      failures.push(...mf.failures);
     }
   }
 
