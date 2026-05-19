@@ -1,0 +1,18 @@
+{
+  "id": "stage-viewport-contract",
+  "level": "L2",
+  "description": "验证 Stage.tsx 维持 1920x1080 (16:9) 视口比例",
+  "fixture": "fixtures/chapter-basic",
+  "expected": {
+    "contracts": {
+      "stage_viewport": {
+        "has_1920x1080": true,
+        "aspect_ratio_16_9": true,
+        "has_scale_transform": true,
+        "has_app_shell": true,
+        "has_stage_fitter": true,
+        "has_stage_frame": true
+      }
+    }
+  }
+}

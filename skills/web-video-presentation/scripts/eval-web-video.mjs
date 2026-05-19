@@ -399,6 +399,54 @@ function runL1(opts) {
   return { evidence, failures };
 }
 
+function checkStageViewport(contracts) {
+  const stagePath = join(TEMPLATES_DIR, 'src', 'components', 'Stage.tsx');
+  const evidence = {};
+  const failures = [];
+
+  if (!fileExists(stagePath)) {
+    return { evidence: { stage_exists: { pass: false, path: relativeSkillPath(stagePath) } }, failures: ['Stage.tsx not found'] };
+  }
+
+  const src = readText(stagePath);
+  const sv = contracts || {};
+
+  const hasWidth = /\b1920\b/.test(src);
+  evidence.has_1920x1080 = { pass: hasWidth };
+  if (sv.has_1920x1080 !== undefined && !hasWidth) failures.push('Stage.tsx must reference 1920 width');
+
+  const wMatch = src.match(/width\s*[:*]\s*(\d+)/g) || [];
+  const hMatch = src.match(/height\s*[:*]\s*(\d+)/g) || [];
+  let ratio16_9 = false;
+  for (const w of wMatch) {
+    const wNum = Number(w.match(/\d+/)[0]);
+    for (const h of hMatch) {
+      const hNum = Number(h.match(/\d+/)[0]);
+      if (hNum > 0 && Math.abs(wNum / hNum - 16 / 9) < 0.01) ratio16_9 = true;
+    }
+  }
+  evidence.aspect_ratio_16_9 = { pass: ratio16_9, width_matches: wMatch.length, height_matches: hMatch.length };
+  if (sv.aspect_ratio_16_9 !== undefined && !ratio16_9) failures.push('Stage.tsx must use 16:9 aspect ratio (1920x1080)');
+
+  const hasScale = /\bscale\s*\(/.test(src) || /transform.*scale/.test(src);
+  evidence.has_scale_transform = { pass: hasScale };
+  if (sv.has_scale_transform !== undefined && !hasScale) failures.push('Stage.tsx must apply scale transform');
+
+  const hasShell = /\bapp-shell\b/.test(src);
+  evidence.has_app_shell = { pass: hasShell };
+  if (sv.has_app_shell !== undefined && !hasShell) failures.push('Stage.tsx must contain app-shell class');
+
+  const hasFitter = /\bstage-fitter\b/.test(src);
+  evidence.has_stage_fitter = { pass: hasFitter };
+  if (sv.has_stage_fitter !== undefined && !hasFitter) failures.push('Stage.tsx must contain stage-fitter class');
+
+  const hasFrame = /\bstage-frame\b/.test(src);
+  evidence.has_stage_frame = { pass: hasFrame };
+  if (sv.has_stage_frame !== undefined && !hasFrame) failures.push('Stage.tsx must contain stage-frame class');
+
+  return { evidence, failures };
+}
+
 function checkNarrationMarkers(narrationLines, contracts) {
   const mf = contracts || {};
   const evidence = {};
@@ -485,6 +533,12 @@ function runL2(opts) {
       const mf = checkNarrationMarkers(narrationLines, contracts.marker_format);
       evidence.marker_format = mf.evidence;
       if (mf.failures.length > 0) failures.push(...mf.failures);
+    }
+
+    if (contracts.stage_viewport) {
+      const sv = checkStageViewport(contracts.stage_viewport);
+      evidence.stage_viewport = sv.evidence;
+      if (sv.failures.length > 0) failures.push(...sv.failures);
     }
 
     return { evidence, failures };
