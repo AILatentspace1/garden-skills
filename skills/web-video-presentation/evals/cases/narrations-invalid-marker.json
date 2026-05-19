@@ -1,7 +1,7 @@
 {
   "id": "narrations-invalid-marker",
   "level": "L2",
-  "description": "Invalid narrations marker case: unclosed brackets and unknown markers exist but case expects them clean, so eval should fail.",
+  "description": "Invalid narrations marker case: tests that validation detects unclosed brackets, nesting, and unknown markers.",
   "fixture": "fixtures/chapter-invalid",
   "expected": {
     "phase": "phase3-audio",

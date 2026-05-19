@@ -408,8 +408,23 @@ function checkNarrationMarkers(narrationLines, contracts) {
 
   const openBrackets = (allCombined.match(/【/g) || []).length;
   const closeBrackets = (allCombined.match(/】/g) || []).length;
+  let depth = 0;
+  let maxDepth = 0;
+  let invalidCloseOrder = false;
+  for (const ch of allCombined) {
+    if (ch === '【') {
+      depth += 1;
+      if (depth > maxDepth) maxDepth = depth;
+    } else if (ch === '】') {
+      if (depth === 0) {
+        invalidCloseOrder = true;
+      } else {
+        depth -= 1;
+      }
+    }
+  }
 
-  evidence.properly_closed = { pass: openBrackets === closeBrackets, open: openBrackets, close: closeBrackets };
+  evidence.properly_closed = { pass: depth === 0 && !invalidCloseOrder, open: openBrackets, close: closeBrackets };
   if (mf.properly_closed !== undefined && evidence.properly_closed.pass !== mf.properly_closed) {
     failures.push('marker brackets not properly closed');
   }
@@ -418,16 +433,14 @@ function checkNarrationMarkers(narrationLines, contracts) {
   let match;
   const foundMarkers = [];
   const unknownMarkers = [];
-  let nestingFound = false;
   while ((match = markerRegex.exec(allCombined)) !== null) {
-    if (match[1].includes('【') || match[1].includes('】')) nestingFound = true;
     foundMarkers.push(match[1].trim());
     if (allowed.length > 0 && !allowed.includes(match[1].trim())) {
       unknownMarkers.push(match[1].trim());
     }
   }
 
-  evidence.no_nesting = { pass: !nestingFound };
+  evidence.no_nesting = { pass: maxDepth <= 1, max_depth: maxDepth };
   if (mf.no_nesting !== undefined && evidence.no_nesting.pass !== mf.no_nesting) {
     failures.push('nested markers detected');
   }
