@@ -422,6 +422,7 @@ function checkNarrationMarkers(narrationLines, contracts) {
   let lastEnd = -1;
   while ((match = markerRegex.exec(allCombined)) !== null) {
     if (match.index < lastEnd) nestingFound = true;
+    if (match[1].includes('【') || match[1].includes('】')) nestingFound = true;
     lastEnd = match.index + match[0].length;
     foundMarkers.push(match[1].trim());
     if (allowed.length > 0 && !allowed.includes(match[1].trim())) {
