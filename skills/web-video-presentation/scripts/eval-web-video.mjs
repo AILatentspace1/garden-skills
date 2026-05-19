@@ -399,6 +399,46 @@ function runL1(opts) {
   return { evidence, failures };
 }
 
+function checkNarrationPacing(fixtureDir, contracts) {
+  const np = contracts || {};
+  const minLen = np.min_len || 10;
+  const maxLen = np.max_len || 200;
+  const evidence = {};
+  const failures = [];
+
+  const chapterRoot = join(fixtureDir, 'src', 'chapters');
+  if (!fileExists(chapterRoot)) {
+    return { evidence: { chapters_found: { pass: false } }, failures: ['No src/chapters/ directory in fixture'] };
+  }
+
+  const chapterDirs = listFiles(chapterRoot).filter(d => d.isDirectory()).map(d => join(chapterRoot, d.name));
+  const allLengths = [];
+  const violations = [];
+
+  for (const chDir of chapterDirs) {
+    const nPath = join(chDir, 'narrations.ts');
+    if (!fileExists(nPath)) continue;
+    const src = readText(nPath);
+    const match = src.match(/(?:export\s+(?:default\s+)?(?:const\s+)?)?narrations\s*(?::[^=]+)?=\s*\[([\s\S]*?)\]\s*(?:as\s+const)?\s*;?/);
+    if (!match) continue;
+    const body = match[1].trim();
+    if (body === '') continue;
+    const strings = body.match(/(["'`])(?:\\.|(?!\1)[\s\S])*\1/g) || [];
+    for (const s of strings) {
+      const text = s.slice(1, -1);
+      allLengths.push({ chapter: relativeSkillPath(chDir), len: text.length });
+      if (text.length < minLen) violations.push({ chapter: relativeSkillPath(chDir), len: text.length, issue: `too_short (${text.length} < ${minLen})` });
+      if (text.length > maxLen) violations.push({ chapter: relativeSkillPath(chDir), len: text.length, issue: `too_long (${text.length} > ${maxLen})` });
+    }
+  }
+
+  evidence.total_narrations = allLengths.length;
+  evidence.all_in_range = { pass: violations.length === 0, violations };
+  if (violations.length > 0) failures.push(`${violations.length} narration(s) outside [${minLen}, ${maxLen}] range`);
+
+  return { evidence, failures };
+}
+
 function checkNarrationMarkers(narrationLines, contracts) {
   const mf = contracts || {};
   const evidence = {};
@@ -485,6 +525,12 @@ function runL2(opts) {
       const mf = checkNarrationMarkers(narrationLines, contracts.marker_format);
       evidence.marker_format = mf.evidence;
       if (mf.failures.length > 0) failures.push(...mf.failures);
+    }
+
+    if (contracts.narration_pacing) {
+      const np = checkNarrationPacing(fixtureDir, contracts.narration_pacing);
+      evidence.narration_pacing = np.evidence;
+      if (np.failures.length > 0) failures.push(...np.failures);
     }
 
     return { evidence, failures };

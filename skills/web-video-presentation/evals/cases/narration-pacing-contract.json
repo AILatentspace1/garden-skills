@@ -1,0 +1,14 @@
+{
+  "id": "narration-pacing-contract",
+  "level": "L2",
+  "description": "验证每个 narration 字符串长度在合理口播范围内",
+  "fixture": "fixtures/chapter-basic",
+  "expected": {
+    "contracts": {
+      "narration_pacing": {
+        "min_len": 10,
+        "max_len": 200
+      }
+    }
+  }
+}
