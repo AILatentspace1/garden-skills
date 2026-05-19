@@ -20,6 +20,7 @@
 import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
 
 // ---------------------------------------------------------------------------
 // Paths
@@ -321,7 +322,77 @@ function checkTemplatesCompleteness() {
 // ---------------------------------------------------------------------------
 // Level runners
 // ---------------------------------------------------------------------------
-function runL0(_opts) {
+function checkTemplateBuildSmoke() {
+  const evidence = {};
+  const failures = [];
+
+  const tsFiles = [];
+  const tsxFiles = [];
+  function walkDir(dir) {
+    for (const entry of listFiles(dir)) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walkDir(full);
+      else if (entry.isFile()) {
+        if (entry.name.endsWith('.ts') && !entry.name.endsWith('.tsx')) tsFiles.push(full);
+        else if (entry.name.endsWith('.tsx')) tsxFiles.push(full);
+      }
+    }
+  }
+
+  try { walkDir(TEMPLATES_DIR); } catch { /* empty */ }
+
+  evidence.ts_syntax_check = { pass: true, checked: 0, failed: [] };
+  for (const f of tsFiles) {
+    evidence.ts_syntax_check.checked++;
+    try {
+      execSync(`node --check "${f.replace(/\\/g, '/')}"`, { stdio: 'pipe', shell: true });
+    } catch {
+      evidence.ts_syntax_check.pass = false;
+      evidence.ts_syntax_check.failed.push(relativeSkillPath(f));
+    }
+  }
+  if (!evidence.ts_syntax_check.pass) {
+    failures.push(`template .ts syntax errors: ${evidence.ts_syntax_check.failed.join(', ')}`);
+  }
+
+  evidence.tsx_structure_check = { pass: true, checked: 0, missing: [] };
+  for (const f of tsxFiles) {
+    evidence.tsx_structure_check.checked++;
+    const src = readText(f);
+    const hasImport = /^\s*import\s/m.test(src);
+    const hasExport = /^\s*export\s/m.test(src);
+    if (!hasImport && !hasExport) {
+      evidence.tsx_structure_check.pass = false;
+      evidence.tsx_structure_check.missing.push(relativeSkillPath(f));
+    }
+  }
+  if (!evidence.tsx_structure_check.pass) {
+    failures.push(`template .tsx files missing import/export: ${evidence.tsx_structure_check.missing.join(', ')}`);
+  }
+
+  evidence.index_html = {
+    pass: fileExists(join(TEMPLATES_DIR, 'index.html'))
+      && /type="module"/.test(readText(join(TEMPLATES_DIR, 'index.html')))
+      && /src="\/src\/main.tsx"/.test(readText(join(TEMPLATES_DIR, 'index.html'))),
+  };
+  if (!evidence.index_html.pass) failures.push('index.html must reference src/main.tsx as module');
+
+  evidence.vite_config = {
+    pass: fileExists(join(TEMPLATES_DIR, 'vite.config.ts'))
+      && /defineConfig/.test(readText(join(TEMPLATES_DIR, 'vite.config.ts')))
+      && /react/.test(readText(join(TEMPLATES_DIR, 'vite.config.ts'))),
+  };
+  if (!evidence.vite_config.pass) failures.push('vite.config.ts must use defineConfig with react plugin');
+
+  evidence.overall = { pass: failures.length === 0 };
+  return { evidence, failures };
+}
+
+function runL0(opts) {
+  if (opts.case === 'template-build-smoke') {
+    return checkTemplateBuildSmoke();
+  }
+
   const evidence = {};
 
   evidence['references-links'] = checkReferencesLinks();
