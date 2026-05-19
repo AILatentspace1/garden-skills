@@ -434,9 +434,10 @@ function checkNarrationMarkers(narrationLines, contracts) {
   const foundMarkers = [];
   const unknownMarkers = [];
   while ((match = markerRegex.exec(allCombined)) !== null) {
-    foundMarkers.push(match[1].trim());
-    if (allowed.length > 0 && !allowed.includes(match[1].trim())) {
-      unknownMarkers.push(match[1].trim());
+    const markerValue = match[1].trim();
+    foundMarkers.push(markerValue);
+    if (allowed.length > 0 && !allowed.includes(markerValue)) {
+      unknownMarkers.push(markerValue);
     }
   }
 
