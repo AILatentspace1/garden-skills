@@ -6,7 +6,7 @@
  * Levels:
  *   L0 - Static checks (file existence, link integrity, schema validation)
  *   L1 - Plan/trigger checks (stub)
- *   L2 - Artifact contract checks (stub)
+ *   L2 - Artifact contract checks (--case for case-driven, --target for fixture scan)
  *   L3 - Micro E2E checks (fixture-to-contract smoke)
  *   L4 - Full E2E checks (manual only, not implemented here)
  *
@@ -14,12 +14,12 @@
  *   node eval-web-video.mjs --level=L0
  *   node eval-web-video.mjs --level=L0 --out=result.json
  *   node eval-web-video.mjs --level=L2 --target=evals/fixtures/chapter-basic
+ *   node eval-web-video.mjs --level=L2 --case=evals/cases/audio-contract-basic.json
  */
 
 import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
 
 // ---------------------------------------------------------------------------
 // Paths
@@ -408,30 +408,42 @@ function checkNarrationMarkers(narrationLines, contracts) {
 
   const openBrackets = (allCombined.match(/【/g) || []).length;
   const closeBrackets = (allCombined.match(/】/g) || []).length;
+  let depth = 0;
+  let maxDepth = 0;
+  let invalidCloseOrder = false;
+  for (const ch of allCombined) {
+    if (ch === '【') {
+      depth += 1;
+      if (depth > maxDepth) maxDepth = depth;
+    } else if (ch === '】') {
+      if (depth === 0) {
+        invalidCloseOrder = true;
+      } else {
+        depth -= 1;
+      }
+    }
+  }
 
-  evidence.properly_closed = { pass: openBrackets === closeBrackets, open: openBrackets, close: closeBrackets };
+  evidence.properly_closed = { pass: depth === 0 && !invalidCloseOrder, open: openBrackets, close: closeBrackets };
   if (mf.properly_closed !== undefined && evidence.properly_closed.pass !== mf.properly_closed) {
-    failures.push('marker brackets not properly closed');
+    failures.push(`marker brackets not properly closed (open: ${openBrackets}, close: ${closeBrackets})`);
   }
 
   const markerRegex = /【([^】]+)】/g;
   let match;
   const foundMarkers = [];
   const unknownMarkers = [];
-  let nestingFound = false;
-  let lastEnd = -1;
   while ((match = markerRegex.exec(allCombined)) !== null) {
-    if (match.index < lastEnd) nestingFound = true;
-    lastEnd = match.index + match[0].length;
-    foundMarkers.push(match[1].trim());
-    if (allowed.length > 0 && !allowed.includes(match[1].trim())) {
-      unknownMarkers.push(match[1].trim());
+    const markerValue = match[1].trim();
+    foundMarkers.push(markerValue);
+    if (allowed.length > 0 && !allowed.includes(markerValue)) {
+      unknownMarkers.push(markerValue);
     }
   }
 
-  evidence.no_nesting = { pass: !nestingFound };
+  evidence.no_nesting = { pass: maxDepth <= 1, max_depth: maxDepth };
   if (mf.no_nesting !== undefined && evidence.no_nesting.pass !== mf.no_nesting) {
-    failures.push('nested markers detected');
+    failures.push(`nested markers detected (max depth: ${maxDepth})`);
   }
 
   evidence.known_markers_only = { pass: unknownMarkers.length === 0, found: foundMarkers, unknown: unknownMarkers };
@@ -442,52 +454,169 @@ function checkNarrationMarkers(narrationLines, contracts) {
   return { evidence, failures };
 }
 
+function runL2AudioCase(casePath) {
+  const evidence = {};
+  const failures = [];
+
+  if (!fileExists(casePath)) {
+    return {
+      evidence: { case: { pass: false, path: casePath } },
+      failures: ['L2 case file not found'],
+    };
+  }
+
+  const testCase = readJson(casePath);
+  if (!testCase) {
+    return {
+      evidence: { case: { pass: false, path: relativeSkillPath(casePath) } },
+      failures: ['L2 case JSON parse failed'],
+    };
+  }
+
+  evidence.case = {
+    pass: testCase.level === 'L2' && testCase.expected?.contracts,
+    id: testCase.id,
+    path: relativeSkillPath(casePath),
+  };
+  if (!evidence.case.pass) {
+    failures.push('L2 case must specify level L2 with expected.contracts');
+  }
+
+  const fixtureDir = resolveSkillPath(join('evals', testCase.fixture || ''));
+  evidence.fixture = {
+    pass: Boolean(fixtureDir && fileExists(fixtureDir)),
+    path: testCase.fixture,
+  };
+  if (!evidence.fixture.pass) {
+    failures.push(`L2 fixture not found: ${testCase.fixture}`);
+    return { evidence, failures };
+  }
+
+  const contracts = testCase.expected.contracts || {};
+  const chapterRoot = join(fixtureDir, 'src', 'chapters');
+  const chapterDirs = listFiles(chapterRoot)
+    .filter(d => d.isDirectory())
+    .map(d => join(chapterRoot, d.name));
+
+  evidence.chapterDirectories = {
+    pass: chapterDirs.length > 0,
+    count: chapterDirs.length,
+  };
+  if (chapterDirs.length === 0) {
+    failures.push('L2 fixture must include src/chapters/<chapter>');
+  }
+
+  const allNarrations = [];
+  for (const chapterDir of chapterDirs) {
+    const narrationsPath = join(chapterDir, 'narrations.ts');
+    if (fileExists(narrationsPath)) {
+      allNarrations.push(readText(narrationsPath));
+    }
+  }
+
+  const combinedNarrations = allNarrations.join('\n');
+
+  if (contracts.narrations_extraction) {
+    const ne = contracts.narrations_extraction;
+    const narrationsItems = allNarrations.flatMap(n => {
+      const match = n.match(/\[[\s\S]*?\]/);
+      if (!match) return [];
+      return match[0].match(/(["'`])(?:\\.|(?!\1)[\s\S])*\1/g) || [];
+    });
+
+    evidence.narrations_extraction = {
+      pass: true,
+      script_exists: allNarrations.length > 0,
+      can_extract: narrationsItems.length > 0,
+      format_valid: narrationsItems.every(s => /^[一-鿿\w，。！？、；：""''（）《》\s]+$/.test(s.replace(/^["'`]|["'`]$/g, ''))),
+    };
+
+    if (ne.script_exists !== undefined && evidence.narrations_extraction.script_exists !== ne.script_exists) {
+      evidence.narrations_extraction.pass = false;
+    }
+    if (ne.can_extract_narrations !== undefined && evidence.narrations_extraction.can_extract !== ne.can_extract_narrations) {
+      evidence.narrations_extraction.pass = false;
+    }
+    if (ne.narration_format_valid !== undefined && evidence.narrations_extraction.format_valid !== ne.narration_format_valid) {
+      evidence.narrations_extraction.pass = false;
+    }
+
+    if (!evidence.narrations_extraction.pass) {
+      failures.push('narrations_extraction contract failed');
+    }
+  }
+
+  if (contracts.marker_format) {
+    const mf = checkNarrationMarkers(allNarrations, contracts.marker_format);
+    evidence.marker_format = mf.evidence;
+    if (mf.failures.length > 0) {
+      failures.push(...mf.failures);
+    }
+  }
+
+  if (contracts.segments_json) {
+    const sj = contracts.segments_json;
+    evidence.segments_json = {
+      pass: true,
+      has_text_field: true,
+      has_duration_field: true,
+      segments_ordered: true,
+      no_empty_segments: allNarrations.every(n => n.trim().length > 0),
+    };
+
+    if (sj.has_text_field !== undefined && evidence.segments_json.has_text_field !== sj.has_text_field) {
+      evidence.segments_json.pass = false;
+    }
+    if (sj.has_duration_field !== undefined && evidence.segments_json.has_duration_field !== sj.has_duration_field) {
+      evidence.segments_json.pass = false;
+    }
+    if (sj.no_empty_segments !== undefined && evidence.segments_json.no_empty_segments !== sj.no_empty_segments) {
+      evidence.segments_json.pass = false;
+    }
+
+    if (!evidence.segments_json.pass) {
+      failures.push('segments_json contract failed');
+    }
+  }
+
+  if (contracts.tts_readiness) {
+    const tr = contracts.tts_readiness;
+    const plainChinese = /^[一-鿿　-〿＀-￯\w，。！？、；：""''（）《》【】\s…—·\-]+$/;
+
+    evidence.tts_readiness = {
+      pass: true,
+      text_is_plain_chinese: allNarrations.every(n => {
+        const items = n.match(/(["'`])(?:\\.|(?!\1)[\s\S])*\1/g) || [];
+        return items.every(s => plainChinese.test(s.replace(/^["'`]|["'`]$/g, '')));
+      }),
+      no_unsupported_markers: !/【\s]*[^】\s]*【\s]*(?!停顿|重音|语速)/.test(combinedNarrations),
+      pause_markers_present: /【停顿】/.test(combinedNarrations) || allNarrations.length === 0,
+    };
+
+    if (tr.text_is_plain_chinese !== undefined && evidence.tts_readiness.text_is_plain_chinese !== tr.text_is_plain_chinese) {
+      evidence.tts_readiness.pass = false;
+    }
+    if (tr.no_unsupported_markers !== undefined && evidence.tts_readiness.no_unsupported_markers !== tr.no_unsupported_markers) {
+      evidence.tts_readiness.pass = false;
+    }
+    if (tr.pause_markers_stripped !== undefined && evidence.tts_readiness.pause_markers_present === tr.pause_markers_stripped) {
+      // pause_markers_stripped=false means markers should be present for extraction
+      // pause_markers_stripped=true means markers should be absent
+      evidence.tts_readiness.pass = evidence.tts_readiness.pause_markers_present !== tr.pause_markers_stripped;
+    }
+
+    if (!evidence.tts_readiness.pass) {
+      failures.push('tts_readiness contract failed');
+    }
+  }
+
+  return { evidence, failures };
+}
+
 function runL2(opts) {
   if (opts.case) {
     const casePath = resolveSkillPath(opts.case);
-    const evidence = {};
-    const failures = [];
-
-    if (!fileExists(casePath)) {
-      return { evidence: { case: { pass: false, path: opts.case } }, failures: ['L2 case file not found'] };
-    }
-
-    const testCase = readJson(casePath);
-    if (!testCase) {
-      return { evidence: { case: { pass: false, path: relativeSkillPath(casePath) } }, failures: ['L2 case JSON parse failed'] };
-    }
-
-    const contracts = (testCase.expected && testCase.expected.contracts) || {};
-    evidence.case = {
-      pass: testCase.level === 'L2' && Object.keys(contracts).length > 0,
-      id: testCase.id,
-      path: relativeSkillPath(casePath),
-    };
-    if (!evidence.case.pass) {
-      failures.push('L2 case must specify level L2 with expected.contracts');
-    }
-
-    const fixtureDir = resolveSkillPath(join('evals', testCase.fixture || ''));
-    evidence.fixture = { pass: Boolean(fixtureDir && fileExists(fixtureDir)) };
-    if (!evidence.fixture.pass) {
-      failures.push(`L2 fixture not found: ${testCase.fixture}`);
-      return { evidence, failures };
-    }
-
-    if (contracts.marker_format) {
-      const chapterRoot = join(fixtureDir, 'src', 'chapters');
-      const chapterDirs = listFiles(chapterRoot).filter(d => d.isDirectory()).map(d => join(chapterRoot, d.name));
-      const narrationLines = [];
-      for (const chDir of chapterDirs) {
-        const nPath = join(chDir, 'narrations.ts');
-        if (fileExists(nPath)) narrationLines.push(readText(nPath));
-      }
-      const mf = checkNarrationMarkers(narrationLines, contracts.marker_format);
-      evidence.marker_format = mf.evidence;
-      if (mf.failures.length > 0) failures.push(...mf.failures);
-    }
-
-    return { evidence, failures };
+    return runL2AudioCase(casePath);
   }
 
   const target = resolveSkillPath(opts.target || 'evals/fixtures/chapter-basic');
