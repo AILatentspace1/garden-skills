@@ -399,6 +399,37 @@ function runL1(opts) {
   return { evidence, failures };
 }
 
+function checkProgressBarVisibility(contracts) {
+  const cssPath = join(TEMPLATES_DIR, 'src', 'components', 'ProgressBar.css');
+  const evidence = {};
+  const failures = [];
+
+  if (!fileExists(cssPath)) {
+    return { evidence: { css_exists: { pass: false, path: relativeSkillPath(cssPath) } }, failures: ['ProgressBar.css not found'] };
+  }
+
+  const src = readText(cssPath);
+  const pv = contracts || {};
+
+  const hasDefaultHidden = /opacity\s*:\s*0/.test(src) || /display\s*:\s*none/.test(src) || /visibility\s*:\s*hidden/.test(src);
+  evidence.has_default_hidden = { pass: hasDefaultHidden };
+  if (pv.has_default_hidden !== undefined && !hasDefaultHidden) failures.push('ProgressBar.css must hide bar by default (opacity:0, display:none, or visibility:hidden)');
+
+  const hasHoverTrigger = /\.pb-hover\s*:hover\s*\.pb/.test(src) || /:hover.*\.pb\b/.test(src);
+  evidence.has_hover_trigger = { pass: hasHoverTrigger };
+  if (pv.has_hover_trigger !== undefined && !hasHoverTrigger) failures.push('ProgressBar.css must have hover trigger (.pb-hover:hover .pb)');
+
+  const hasHoverVisible = /\.pb-hover\s*:hover\s*\.pb[^{]*{[^}]*opacity\s*:\s*1/.test(src) || /\.pb-hover\s*:hover[^{]*{[^}]*opacity\s*:\s*1/.test(src.replace(/\n/g, ' '));
+  evidence.has_hover_visible = { pass: hasHoverVisible };
+  if (pv.has_hover_visible !== undefined && !hasHoverVisible) failures.push('ProgressBar.css must restore visibility on hover (opacity: 1)');
+
+  const hasTransition = /transition/.test(src);
+  evidence.has_transition = { pass: hasTransition };
+  if (pv.has_transition !== undefined && !hasTransition) failures.push('ProgressBar.css must include transition property');
+
+  return { evidence, failures };
+}
+
 function checkNarrationMarkers(narrationLines, contracts) {
   const mf = contracts || {};
   const evidence = {};
@@ -485,6 +516,12 @@ function runL2(opts) {
       const mf = checkNarrationMarkers(narrationLines, contracts.marker_format);
       evidence.marker_format = mf.evidence;
       if (mf.failures.length > 0) failures.push(...mf.failures);
+    }
+
+    if (contracts.progressbar_visibility) {
+      const pv = checkProgressBarVisibility(contracts.progressbar_visibility);
+      evidence.progressbar_visibility = pv.evidence;
+      if (pv.failures.length > 0) failures.push(...pv.failures);
     }
 
     return { evidence, failures };

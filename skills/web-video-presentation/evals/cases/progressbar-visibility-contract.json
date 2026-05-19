@@ -1,0 +1,16 @@
+{
+  "id": "progressbar-visibility-contract",
+  "level": "L2",
+  "description": "验证 ProgressBar 默认隐藏、hover 显示行为",
+  "fixture": "fixtures/chapter-basic",
+  "expected": {
+    "contracts": {
+      "progressbar_visibility": {
+        "has_default_hidden": true,
+        "has_hover_trigger": true,
+        "has_hover_visible": true,
+        "has_transition": true
+      }
+    }
+  }
+}
